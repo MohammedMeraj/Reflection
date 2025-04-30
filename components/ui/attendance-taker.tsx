@@ -112,6 +112,7 @@ export const AttendanceTaker = ({
       {/* Header section */}
       <div className="sticky top-0 z-10 bg-white shadow-sm px-4 py-3 flex flex-col gap-3">
         {/* Tags row */}
+        <h2 className="text-lg font-medium mb-1">Add Attendance</h2>
         <div className="flex items-center justify-between gap-1 overflow-x-auto pb-1 no-scrollbar">
           <div className="flex items-center gap-1 flex-nowrap">
             <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium whitespace-nowrap">

@@ -3,7 +3,7 @@
 import { FC } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, ChartSpline, PlusSquare, MessageSquare, User } from "lucide-react";
+import { Home, ChartSpline, PlusSquare, UserX, User } from "lucide-react";
 import { cn } from "@/lib/utils"; // Make sure you have this utility function for combining classNames
 
 interface NavigationItem {
@@ -29,9 +29,9 @@ const navigationItems: NavigationItem[] = [
     href: "/attendance",
   },
   {
-    icon: <MessageSquare size={18} />,
-    label: "Messages",
-    href: "/messages",
+    icon: <UserX size={18} />,
+    label: "Defaulter",
+    href: "/defaulters",
   },
   {
     icon: <User size={18} />,
