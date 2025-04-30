@@ -3,7 +3,6 @@
 import { AttendanceTaker } from "@/components/ui/attendance-taker";
 import { useState, useEffect } from "react";
 
-
 interface Student {
   id: string;
   name: string;

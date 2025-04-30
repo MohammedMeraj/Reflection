@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search } from "lucide-react";
+import { Search, RefreshCw } from "lucide-react";
 
 interface Student {
   id: string;
@@ -83,6 +83,16 @@ export const AttendanceTaker = ({
         return student; // Leave already marked students unchanged
       })
     );
+  };
+
+  // Reset all students to unmarked state
+  const handleReset = () => {
+    setCurrentStudents(students.map(student => ({
+      ...student,
+      isPresent: false,
+      isMarked: false
+    })));
+    setMarkMode("absent");
   };
 
   // Save attendance
@@ -179,22 +189,32 @@ export const AttendanceTaker = ({
         )}
       </div>
 
-      {/* Footer with action buttons */}
-      <div className="sticky bottom-16 md:bottom-0 w-full flex justify-between items-center p-4 bg-white border-t">
-        <button
-          onClick={handleMarkAll}
-          className="px-4 py-2 rounded-full text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 transition"
-        >
-          {markMode === "absent" ? "Mark All Present" : "Mark All Absent"}
-        </button>
-        
-        <button
-          onClick={handleSaveAttendance}
-          disabled={isLoading}
-          className="px-6 py-2 rounded-full bg-blue-500 hover:bg-blue-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? "Saving..." : "Save Attendance"}
-        </button>
+      {/* Footer with action buttons - all in a single line */}
+      <div className="sticky bottom-16 md:bottom-0 w-full p-4 bg-white border-t">
+        <div className="flex justify-between items-center gap-2">
+          <button
+            onClick={handleReset}
+            className="flex items-center justify-center px-3 py-2 rounded-full text-sm font-medium text-white bg-gray-500 hover:bg-gray-600 transition"
+          >
+            <RefreshCw size={16} className="mr-1" />
+            Reset
+          </button>
+          
+          <button
+            onClick={handleMarkAll}
+            className="px-3 py-2 rounded-full text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 transition"
+          >
+            {markMode === "absent" ? "Mark Present" : "Mark Absent"}
+          </button>
+          
+          <button
+            onClick={handleSaveAttendance}
+            disabled={isLoading}
+            className="px-3 py-2 rounded-full bg-green-500 hover:bg-green-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? "Saving..." : "Save"}
+          </button>
+        </div>
       </div>
     </div>
   );
