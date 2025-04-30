@@ -8,12 +8,16 @@ interface Student {
   name: string;
   rollNo: string;
   isPresent: boolean;
+  isMarked: boolean; // Track if student has been explicitly marked
 }
 
 interface AttendanceTakerProps {
   students: Student[];
   onSave: (students: Student[]) => void;
   courseId?: string;
+  branch?: string;
+  classYear?: string;
+  sessionType?: "Lecture" | "Lab";
   date?: string;
 }
 
@@ -21,12 +25,24 @@ export const AttendanceTaker = ({
   students,
   onSave,
   courseId = "",
+  branch = "CSE",
+  classYear = "FY",
+  sessionType = "Lecture",
   date = new Date().toISOString().split("T")[0],
 }: AttendanceTakerProps) => {
-  const [currentStudents, setCurrentStudents] = useState<Student[]>(students);
+  // Initialize students with isMarked=false
+  const [currentStudents, setCurrentStudents] = useState<Student[]>(
+    students.map(student => ({
+      ...student,
+      isMarked: false
+    }))
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [markMode, setMarkMode] = useState<"absent" | "present">("absent");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Format date to display as DD/MM/YYYY
+  const formattedDate = date.split("-").reverse().join("/");
 
   // Filter students based on search term
   const filteredStudents = currentStudents.filter((student) =>
@@ -34,7 +50,7 @@ export const AttendanceTaker = ({
     student.rollNo.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Toggle student attendance status
+  // Toggle individual student attendance status
   const toggleAttendance = (studentId: string) => {
     setCurrentStudents((prev) =>
       prev.map((student) =>
@@ -42,9 +58,30 @@ export const AttendanceTaker = ({
           ? {
               ...student,
               isPresent: !student.isPresent,
+              isMarked: true, // Mark this student as explicitly marked
             }
           : student
       )
+    );
+  };
+
+  // Mark all unmarked students based on mode
+  const handleMarkAll = () => {
+    const newMode = markMode === "absent" ? "present" : "absent";
+    setMarkMode(newMode);
+    
+    // Only update students that haven't been explicitly marked
+    setCurrentStudents(prev => 
+      prev.map(student => {
+        if (!student.isMarked) {
+          return {
+            ...student,
+            isPresent: newMode === "present", // If switching to "present" mode, mark unmarked students as present
+            isMarked: true
+          };
+        }
+        return student; // Leave already marked students unchanged
+      })
     );
   };
 
@@ -53,30 +90,33 @@ export const AttendanceTaker = ({
     setIsLoading(true);
     // Simulate API call
     setTimeout(() => {
-      onSave(currentStudents);
+      // Remove isMarked field before saving
+      const cleanStudents = currentStudents.map(({isMarked, ...student}) => student);
+      onSave(cleanStudents as Student[]);
       setIsLoading(false);
     }, 500);
-  };
-
-  // Toggle mark mode
-  const toggleMarkMode = () => {
-    setMarkMode(markMode === "absent" ? "present" : "absent");
   };
 
   return (
     <div className="flex flex-col h-full bg-slate-50">
       {/* Header section */}
       <div className="sticky top-0 z-10 bg-white shadow-sm px-4 py-3 flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold">
-            Attendance for {date}
-          </h1>
-          <button
-            onClick={toggleMarkMode}
-            className="px-4 py-2 rounded-full text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 transition"
-          >
-            Mark {markMode === "absent" ? "Absent" : "Present"}
-          </button>
+        {/* Tags row */}
+        <div className="flex items-center justify-between gap-1 overflow-x-auto pb-1 no-scrollbar">
+          <div className="flex items-center gap-1 flex-nowrap">
+            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium whitespace-nowrap">
+              {branch}
+            </span>
+            <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium whitespace-nowrap">
+              {classYear}
+            </span>
+            <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium whitespace-nowrap">
+              {formattedDate}
+            </span>
+            <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium whitespace-nowrap">
+              {sessionType}
+            </span>
+          </div>
         </div>
         
         {/* Search Bar */}
@@ -101,7 +141,9 @@ export const AttendanceTaker = ({
           <span>
             Absent: {currentStudents.filter((s) => !s.isPresent).length}
           </span>
-          <span>Total: {currentStudents.length}</span>
+          <span>
+            Unmarked: {currentStudents.filter((s) => !s.isMarked).length}
+          </span>
         </div>
       </div>
 
@@ -118,11 +160,11 @@ export const AttendanceTaker = ({
                 <button
                   onClick={() => toggleAttendance(student.id)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                    student.isPresent
-                      ? "bg-green-100 text-green-700"
-                      : markMode === "absent" 
-                        ? "bg-red-100 text-red-700" 
-                        : "bg-gray-100 text-gray-700"
+                    student.isMarked
+                      ? student.isPresent 
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700" 
+                      : "bg-gray-100 text-gray-700"
                   }`}
                 >
                   {student.rollNo}
@@ -137,12 +179,19 @@ export const AttendanceTaker = ({
         )}
       </div>
 
-      {/* Footer with save button */}
-      <div className="sticky bottom-16 md:bottom-0 w-full flex justify-center p-4 bg-white border-t">
+      {/* Footer with action buttons */}
+      <div className="sticky bottom-16 md:bottom-0 w-full flex justify-between items-center p-4 bg-white border-t">
+        <button
+          onClick={handleMarkAll}
+          className="px-4 py-2 rounded-full text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 transition"
+        >
+          {markMode === "absent" ? "Mark All Present" : "Mark All Absent"}
+        </button>
+        
         <button
           onClick={handleSaveAttendance}
           disabled={isLoading}
-          className="w-full max-w-xs py-3 rounded-full bg-blue-500 hover:bg-blue-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2 rounded-full bg-blue-500 hover:bg-blue-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? "Saving..." : "Save Attendance"}
         </button>

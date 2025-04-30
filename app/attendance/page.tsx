@@ -9,6 +9,7 @@ interface Student {
   name: string;
   rollNo: string;
   isPresent: boolean;
+  isMarked: boolean;
 }
 
 // Mock data - in a real app, you would fetch this from an API
@@ -20,6 +21,7 @@ const mockStudents: Student[] = Array.from({ length: 50 }, (_, i) => {
     name: `Student ${num}`,
     rollNo: `CS${paddedNum}`,
     isPresent: false, // All students marked absent by default
+    isMarked: false,  // No students explicitly marked yet
   };
 });
 
@@ -116,6 +118,9 @@ export default function AttendancePage() {
         students={students}
         onSave={handleSaveAttendance}
         courseId={courseId}
+        branch="CSE"
+        classYear="SY"
+        sessionType="Lecture"
         date={currentDate}
       />
     </div>
