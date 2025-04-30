@@ -16,7 +16,7 @@ const navigationItems: NavigationItem[] = [
   {
     icon: <Home size={18} />,  
     label: "Home",
-    href: "/",
+    href: "/home",
   },
   {
     icon: <ChartSpline size={18} />,
