@@ -14,27 +14,27 @@ interface NavigationItem {
 
 const navigationItems: NavigationItem[] = [
   {
-    icon: <Home size={24} />,
+    icon: <Home size={15} />,
     label: "Home",
     href: "/",
   },
   {
-    icon: <Search size={24} />,
+    icon: <Search size={15} />,
     label: "Search",
     href: "/search",
   },
   {
-    icon: <PlusSquare size={24} />,
+    icon: <PlusSquare size={15} />,
     label: "Create",
     href: "/create",
   },
   {
-    icon: <MessageSquare size={24} />,
+    icon: <MessageSquare size={15} />,
     label: "Messages",
     href: "/messages",
   },
   {
-    icon: <User size={24} />,
+    icon: <User size={15} />,
     label: "Profile",
     href: "/profile",
   },
@@ -46,7 +46,7 @@ export const MobileNavigation: FC = () => {
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border">
       <nav className="flex justify-around items-center h-16">
-        {navigationItems.map((item) => {
+        {navigationItems.map((item: NavigationItem) => {
           const isActive = pathname === item.href;
           return (
             <Link
