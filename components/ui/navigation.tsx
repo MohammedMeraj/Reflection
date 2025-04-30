@@ -14,27 +14,27 @@ interface NavigationItem {
 
 const navigationItems: NavigationItem[] = [
   {
-    icon: <Home size={15} />,
+    icon: <Home size={18} />,
     label: "Home",
     href: "/",
   },
   {
-    icon: <Search size={15} />,
+    icon: <Search size={18} />,
     label: "Search",
     href: "/search",
   },
   {
-    icon: <PlusSquare size={15} />,
-    label: "Create",
-    href: "/create",
+    icon: <PlusSquare size={18} />,
+    label: "Attendance",
+    href: "/attendance",
   },
   {
-    icon: <MessageSquare size={15} />,
+    icon: <MessageSquare size={18} />,
     label: "Messages",
     href: "/messages",
   },
   {
-    icon: <User size={15} />,
+    icon: <User size={18} />,
     label: "Profile",
     href: "/profile",
   },
