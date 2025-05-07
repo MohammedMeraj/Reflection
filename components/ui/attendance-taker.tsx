@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Search, RefreshCw } from "lucide-react";
 
-interface Student {
+export interface Student {
   id: string;
   name: string;
   rollNo: string;
@@ -17,8 +17,14 @@ interface AttendanceTakerProps {
   courseId?: string;
   branch?: string;
   classYear?: string;
+  division?: string;
   sessionType?: "Lecture" | "Lab";
+  batch?: string;
+  subject?: string;
+  lectureNumber?: number;
   date?: string;
+  facultyId?: string;
+  onBack?: () => void;
 }
 
 export const AttendanceTaker = ({
@@ -27,8 +33,14 @@ export const AttendanceTaker = ({
   courseId = "",
   branch = "CSE",
   classYear = "FY",
+  division = "",
   sessionType = "Lecture",
+  batch = "",
+  subject = "",
+  lectureNumber = 1,
   date = new Date().toISOString().split("T")[0],
+  facultyId = "",
+  onBack,
 }: AttendanceTakerProps) => {
   // Initialize students with isMarked=false
   const [currentStudents, setCurrentStudents] = useState<Student[]>(
@@ -111,22 +123,52 @@ export const AttendanceTaker = ({
     <div className="flex flex-col h-full bg-slate-50">
       {/* Header section */}
       <div className="sticky top-0 z-10 bg-white shadow-sm px-4 py-3 flex flex-col gap-3">
+        {/* Header with back option */}
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-medium">Add Attendance</h2>
+          {onBack && (
+            <button 
+              onClick={onBack}
+              className="text-sm text-blue-500 hover:text-blue-700"
+            >
+              Change Selection
+            </button>
+          )}
+        </div>
+        
         {/* Tags row */}
-        <h2 className="text-lg font-medium mb-1">Add Attendance</h2>
         <div className="flex items-center justify-between gap-1 overflow-x-auto pb-1 no-scrollbar">
           <div className="flex items-center gap-1 flex-nowrap">
             <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium whitespace-nowrap">
               {branch}
             </span>
             <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium whitespace-nowrap">
-              {classYear}
+              {classYear}{division ? ` ${division}` : ''}
             </span>
+            {batch && (
+              <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium whitespace-nowrap">
+                Batch {batch}
+              </span>
+            )}
             <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium whitespace-nowrap">
               {formattedDate}
             </span>
             <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium whitespace-nowrap">
               {sessionType}
             </span>
+            {subject && (
+              <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium whitespace-nowrap">
+                {subject}
+              </span>
+            )}
+            <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium whitespace-nowrap">
+              Lecture #{lectureNumber}
+            </span>
+            {facultyId && (
+              <span className="px-2 py-1 bg-teal-100 text-teal-700 rounded-full text-xs font-medium whitespace-nowrap">
+                Faculty: {facultyId}
+              </span>
+            )}
           </div>
         </div>
         

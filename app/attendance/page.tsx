@@ -1,15 +1,24 @@
 "use client";
 
-import { AttendanceTaker } from "@/components/ui/attendance-taker";
 import { useState, useEffect } from "react";
+import { AttendanceTaker, Student } from "@/components/ui/attendance-taker";
+import { AttendanceSelection } from "../_component/faculty/attendance-selection";
+import { SkeletonLoading } from "../_component/faculty/skeleton-loading";
 
-interface Student {
-  id: string;
-  name: string;
-  rollNo: string;
-  isPresent: boolean;
-  isMarked: boolean;
+// Define SelectionData interface in this file to avoid import issues
+interface SelectionData {
+  classYear: string;
+  division?: string;
+  sessionType: "Lecture" | "Lab";
+  batch?: string;
+  subject: string;
+  lectureNumber: number;
+  date: string;
+  branch: string;
+  facultyId: string;
 }
+
+
 
 // Mock data - in a real app, you would fetch this from an API
 const mockStudents: Student[] = Array.from({ length: 50 }, (_, i) => {
@@ -24,56 +33,71 @@ const mockStudents: Student[] = Array.from({ length: 50 }, (_, i) => {
   };
 });
 
+// Divide students into batches (for lab sessions)
+const studentBatches = {
+  T1: mockStudents.slice(0, 12),
+  T2: mockStudents.slice(12, 25),
+  T3: mockStudents.slice(25, 38),
+  T4: mockStudents.slice(38),
+};
+
 export default function AttendancePage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const [courseId, setCourseId] = useState("CS101");
-  const [currentDate, setCurrentDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
-
-  // Simulate fetching students from API with progress bar
+  const [selectionComplete, setSelectionComplete] = useState(false);
+  const [selectionData, setSelectionData] = useState<SelectionData | null>(null);
+  
+  // Simulate fetching students from API
   useEffect(() => {
+    if (!selectionComplete || !selectionData) return;
+    
     const fetchStudents = async () => {
-      // Reset progress
-      setLoadingProgress(0);
+      setLoading(true);
       
-      // Simulate progressive loading
-      const interval = setInterval(() => {
-        setLoadingProgress(prev => {
-          const newProgress = prev + 10;
-          if (newProgress >= 100) {
-            clearInterval(interval);
-            // Set data when loading completes
-            setTimeout(() => {
-              setStudents(mockStudents);
-              setLoading(false);
-            }, 200);
-            return 100;
-          }
-          return newProgress;
-        });
-      }, 150);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      return () => clearInterval(interval);
+      // Get appropriate students based on selection
+      if (selectionData.sessionType === "Lab" && selectionData.batch) {
+        // For lab sessions, get students from the selected batch
+        setStudents(studentBatches[selectionData.batch as keyof typeof studentBatches] || []);
+      } else {
+        // For lectures, get all students
+        setStudents(mockStudents);
+      }
+      
+      setLoading(false);
     };
-
+    
     fetchStudents();
-  }, [courseId]);
+  }, [selectionComplete, selectionData]);
+  
+  // Handle selection completion
+  const handleSelectionComplete = (selection: SelectionData) => {
+    setSelectionData(selection);
+    setSelectionComplete(true);
+  };
+  
+  // Handle going back to selection
+  const handleBackToSelection = () => {
+    setSelectionComplete(false);
+    setSelectionData(null);
+  };
 
   // Handle saving attendance
   const handleSaveAttendance = async (updatedStudents: Student[]) => {
     // In a real app, you would send this to your API
-    // await fetch(`/api/attendance/${courseId}/${currentDate}`, {
+    // await fetch(`/api/attendance/${selectionData?.subject}/${selectionData?.date}`, {
     //   method: "POST",
     //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({ students: updatedStudents }),
+    //   body: JSON.stringify({ 
+    //     students: updatedStudents,
+    //     ...selectionData
+    //   }),
     // });
     
     console.log("Attendance saved:", {
-      courseId,
-      date: currentDate,
+      ...selectionData,
       presentCount: updatedStudents.filter(s => s.isPresent).length,
       absentCount: updatedStudents.filter(s => !s.isPresent).length,
       students: updatedStudents,
@@ -86,27 +110,18 @@ export default function AttendancePage() {
     alert("Attendance saved successfully!");
   };
 
+  if (!selectionComplete) {
+    return (
+      <div className="flex flex-col h-screen">
+        <AttendanceSelection onComplete={handleSelectionComplete} />
+      </div>
+    );
+  }
+  
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen p-6">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-4">
-            <h2 className="text-xl font-semibold mb-2">Loading Students</h2>
-            <p className="text-gray-600 mb-4">Please wait while we fetch the student data</p>
-          </div>
-          
-          {/* Progress bar */}
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div 
-              className="bg-blue-500 h-2.5 rounded-full transition-all duration-300" 
-              style={{ width: `${loadingProgress}%` }}
-            ></div>
-          </div>
-          
-          <div className="text-right text-sm text-gray-500 mt-1">
-            {loadingProgress}%
-          </div>
-        </div>
+      <div className="flex flex-col h-screen">
+        <SkeletonLoading message={`Loading ${selectionData?.sessionType === "Lab" ? `Batch ${selectionData.batch}` : "Class"} Students`} />
       </div>
     );
   }
@@ -116,11 +131,16 @@ export default function AttendancePage() {
       <AttendanceTaker
         students={students}
         onSave={handleSaveAttendance}
-        courseId={courseId}
-        branch="CSE"
-        classYear="SY"
-        sessionType="Lecture"
-        date={currentDate}
+        onBack={handleBackToSelection}
+        classYear={selectionData?.classYear || ""}
+        division={selectionData?.division}
+        sessionType={selectionData?.sessionType || "Lecture"}
+        batch={selectionData?.batch}
+        subject={selectionData?.subject}
+        lectureNumber={selectionData?.lectureNumber}
+        date={selectionData?.date}
+        branch={selectionData?.branch}
+        facultyId={selectionData?.facultyId}
       />
     </div>
   );
