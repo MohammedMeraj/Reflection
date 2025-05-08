@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AttendanceVisualization } from "@/components/ui/attendance-visualization";
+import { AttendanceVisualization } from "@/app/_component/faculty/attendance-visualization";
 
 // --- Types ---------------------------------------------------
 type AttendanceRecord = {

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AttendanceTaker, Student } from "@/components/ui/attendance-taker";
-import { AttendanceSelection } from "../_component/faculty/attendance-selection";
-import { SkeletonLoading } from "../_component/faculty/skeleton-loading";
+import { AttendanceTaker, Student } from "@/app/_component/faculty/attendance-taker";
+import { AttendanceSelection } from "@/app/_component/faculty/attendance-selection";
+import { SkeletonLoading } from "@/app/_component/faculty/skeleton-loading";
 
 // Define SelectionData interface in this file to avoid import issues
 interface SelectionData {

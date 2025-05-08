@@ -1,7 +1,8 @@
 "use client";
 
+import { FacultyProfile } from "@/app/_component/faculty/profile-component";
 import { useState, useEffect } from "react";
-import { FacultyProfile } from "../_component/faculty/profile-component";
+
 
 // --- Types ---------------------------------------------------
 type Education = {
