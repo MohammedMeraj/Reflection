@@ -205,7 +205,7 @@ export const AttendanceDashboard = ({
       <div className="px-4 mb-6">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-md font-medium text-gray-800">Defaulters Summary</h3>
-          <Link href="/defaulters" className="text-blue-600 text-sm font-medium">View All</Link>
+          <Link href="/faculty/defaulters" className="text-blue-600 text-sm font-medium">View All</Link>
         </div>
         <div className="bg-white rounded-xl shadow-sm p-4">
           <div className="mb-4">
