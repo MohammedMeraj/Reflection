@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
+import { LogOut} from "lucide-react";
+import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 interface SubjectTaught {
   id: string;
   name: string;
@@ -71,6 +72,11 @@ export const FacultyProfile = ({
             <p className="text-sm text-blue-600">{facultyInfo.position}</p>
             <p className="text-xs text-gray-500">{facultyInfo.department}</p>
           </div>
+          <LogoutLink>
+          <div className="ml-2 w-fit h-fit p-1 ">
+            <LogOut size={18} strokeWidth={2.25}/>
+          </div>
+          </LogoutLink>
         </div>
 
         {/* Tab selection */}
