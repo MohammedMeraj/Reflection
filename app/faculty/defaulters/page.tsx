@@ -1,4 +1,4 @@
-import { DefaultersView } from "@/components/ui/defaulterView";
+import { DefaultersView } from "@/app/_component/faculty/defaulterView";
 
 // Mock data for classes
 const mockClasses = [

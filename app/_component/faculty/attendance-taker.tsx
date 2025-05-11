@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 export interface Student {
   id: string;
@@ -49,18 +49,11 @@ export const AttendanceTaker = ({
       isMarked: false
     }))
   );
-  const [searchTerm, setSearchTerm] = useState("");
   const [markMode, setMarkMode] = useState<"absent" | "present">("absent");
   const [isLoading, setIsLoading] = useState(false);
 
   // Format date to display as DD/MM/YYYY
   const formattedDate = date.split("-").reverse().join("/");
-
-  // Filter students based on search term
-  const filteredStudents = currentStudents.filter((student) =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    student.rollNo.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   // Toggle individual student attendance status
   const toggleAttendance = (studentId: string) => {
@@ -171,20 +164,6 @@ export const AttendanceTaker = ({
             )}
           </div>
         </div>
-        
-        {/* Search Bar */}
-        <div className="relative">
-          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <Search size={18} className="text-gray-400" />
-          </div>
-          <input
-            type="text"
-            className="pl-10 pr-4 py-2 w-full rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            placeholder="Search by name or roll no..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
 
         {/* Stats summary */}
         <div className="flex justify-between text-sm text-gray-500">
@@ -200,52 +179,42 @@ export const AttendanceTaker = ({
         </div>
       </div>
 
-      {/* Students list */}
-      <div className="flex-1 overflow-y-auto px-4 py-2">
-        {filteredStudents.length > 0 ? (
-          <ul className="space-y-2">
-            {filteredStudents.map((student) => (
-              <li
-                key={student.id}
-                className="flex items-center justify-between py-3 px-4 bg-white rounded-xl shadow-sm"
-              >
-                <span className="font-medium">{student.name}</span>
-                <button
-                  onClick={() => toggleAttendance(student.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                    student.isMarked
-                      ? student.isPresent 
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700" 
-                      : "bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  {student.rollNo}
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-48 text-gray-500">
-            <p>No students found</p>
-          </div>
-        )}
+      {/* Students roll numbers grid */}
+      <div className="flex-1 overflow-y-auto p-2 md:p-4">
+        <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 md:gap-2">
+          {currentStudents.map((student) => (
+            <button
+              key={student.id}
+              onClick={() => toggleAttendance(student.id)}
+              className={`flex items-center justify-center aspect-square rounded-full text-xs sm:text-sm font-medium transition-colors shadow-sm ${
+                student.isMarked
+                  ? student.isPresent 
+                    ? "bg-green-100 text-green-700 border-2 border-green-300"
+                    : "bg-red-100 text-red-700 border-2 border-red-300" 
+                  : "bg-gray-100 text-gray-700 border-2 border-gray-200"
+              }`}
+              title={student.name} // Show name on hover
+            >
+              {student.rollNo}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Footer with action buttons - all in a single line */}
-      <div className="sticky bottom-16 md:bottom-0 w-full p-4 bg-white border-t">
-        <div className="flex justify-between items-center gap-2">
+      <div className="sticky bottom-16 md:bottom-0 w-full p-2 md:p-4 bg-white border-t">
+        <div className="flex justify-between items-center gap-1 md:gap-2 max-w-4xl mx-auto">
           <button
             onClick={handleReset}
-            className="flex items-center justify-center px-3 py-2 rounded-full text-sm font-medium text-white bg-gray-500 hover:bg-gray-600 transition"
+            className="flex items-center justify-center px-2 md:px-3 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium text-white bg-gray-500 hover:bg-gray-600 transition"
           >
-            <RefreshCw size={16} className="mr-1" />
+            <RefreshCw size={14} className="mr-1" />
             Reset
           </button>
           
           <button
             onClick={handleMarkAll}
-            className="px-3 py-2 rounded-full text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 transition"
+            className="px-2 md:px-3 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 transition"
           >
             {markMode === "absent" ? "Mark Present" : "Mark Absent"}
           </button>
@@ -253,7 +222,7 @@ export const AttendanceTaker = ({
           <button
             onClick={handleSaveAttendance}
             disabled={isLoading}
-            className="px-3 py-2 rounded-full bg-green-500 hover:bg-green-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-2 md:px-3 py-1.5 md:py-2 rounded-full bg-green-500 hover:bg-green-600 text-white text-xs md:text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? "Saving..." : "Save"}
           </button>
