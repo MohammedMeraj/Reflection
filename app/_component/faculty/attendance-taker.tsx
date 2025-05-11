@@ -181,7 +181,7 @@ export const AttendanceTaker = ({
 
       {/* Students roll numbers grid */}
       <div className="flex-1 overflow-y-auto p-2 md:p-4">
-        <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 md:gap-2">
+        <div className="grid grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2 md:gap-3">
           {currentStudents.map((student) => (
             <button
               key={student.id}
