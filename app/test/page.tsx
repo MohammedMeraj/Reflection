@@ -5,7 +5,7 @@ import React from 'react'
 const page = () => {
   return (
     <div>
-       <Link href="https://wa.me/1111111111?text=sMPLWWED"> <Button>send</Button></Link>
+       <Link target='_blank' href="https://wa.me/1111111111?text=sMPLWWED"> <Button>send</Button></Link>
 
     </div>
   )

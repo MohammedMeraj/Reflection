@@ -51,12 +51,14 @@ export const AttendanceDashboard = ({
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-800">Reflektion</h1>
           
+          <Link href="/test">
           <div className="relative">
             <Bell size={20} className="text-gray-600" />
             {notifications > 0 && (
               <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
             )}
           </div>
+          </Link>
         </div>
         
         <div className="flex flex-col items-center justify-center mt-4">

@@ -1,5 +1,5 @@
 "use client"
-import { AttendanceDashboard } from "@/components/ui/faculty-home";
+import { AttendanceDashboard } from "@/app/_component/faculty/faculty-home";
 
 // Mock data for the dashboard
 const mockClasses = [
