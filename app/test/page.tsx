@@ -1,14 +1,22 @@
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import React from 'react'
+// app/page.tsx
+import React from 'react';
 
-const page = () => {
+export default function Page() {
+  // Replace 15551234567 with your full international number, no plus or symbols
+  const phone = '1111111111';
+  const text  = encodeURIComponent('sMPLWWED');
+  const href  = `whatsapp://send?phone=${phone}&text=${text}`;
+
   return (
     <div>
-       <Link target='_blank' href="https://wa.me/1111111111?text=sMPLWWED"> <Button>send</Button></Link>
-
+      <a
+        href={href}                     // native scheme
+        target="_blank"                 // signals external navigation
+        rel="noopener noreferrer"       // security best practice
+        style={{ textDecoration: 'none' }}
+      >
+        <button>Send via WhatsApp</button>
+      </a>
     </div>
-  )
+  );
 }
-
-export default page
