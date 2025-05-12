@@ -2,17 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 
 export interface Student {
   id: string;
   name: string;
-  rollNo: string;
+  rollNo: number; // Using number type for roll numbers
   isPresent: boolean;
   isMarked: boolean; // Track if student has been explicitly marked
 }
 
 interface AttendanceTakerProps {
-  students: Student[];
+  students?: Student[];
   onSave: (students: Student[]) => void;
   courseId?: string;
   branch?: string;
@@ -42,15 +44,34 @@ export const AttendanceTaker = ({
   facultyId = "",
   onBack,
 }: AttendanceTakerProps) => {
-  // Initialize students with isMarked=false
-  const [currentStudents, setCurrentStudents] = useState<Student[]>(
-    students.map(student => ({
-      ...student,
-      isMarked: false
-    }))
-  );
+  // Define strength (number of students) - can be modified as needed
+  const strength: number = 40; // Change this number to control how many roll numbers (1 to strength)
+  
+  // Generate default students with roll numbers 1 to strength
+  const generateDefaultStudents = () => {
+    return Array.from({ length: strength }, (_, index) => {
+      const rollNumber = index + 1;
+      return {
+        id: String(rollNumber),
+        name: `Student ${rollNumber}`,
+        rollNo: rollNumber,
+        isPresent: false,
+        isMarked: false
+      };
+    });
+  };
+  
+  // Initialize students with numbers 1 to strength if not provided
+  const [currentStudents, setCurrentStudents] = useState<Student[]>(() => {
+    // Always use generated students with simple numeric roll numbers
+    return generateDefaultStudents();
+  });
+  
   const [markMode, setMarkMode] = useState<"absent" | "present">("absent");
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Get Convex mutation
+  const addAbsentStudent = useMutation(api.students.addAbsentStudent);
 
   // Format date to display as DD/MM/YYYY
   const formattedDate = date.split("-").reverse().join("/");
@@ -92,24 +113,42 @@ export const AttendanceTaker = ({
 
   // Reset all students to unmarked state
   const handleReset = () => {
-    setCurrentStudents(students.map(student => ({
-      ...student,
-      isPresent: false,
-      isMarked: false
-    })));
+    // Always reset to default numeric roll numbers
+    setCurrentStudents(generateDefaultStudents());
     setMarkMode("absent");
   };
 
-  // Save attendance
-  const handleSaveAttendance = () => {
+  // Save attendance and store absent students in Convex
+  const handleSaveAttendance = async () => {
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Find absent students
+      const absentStudents = currentStudents.filter(student => !student.isPresent);
+      
+      // Save absent students to Convex database
+      const savePromises = absentStudents.map(student => 
+        addAbsentStudent({
+          prn: student.rollNo,
+          subject: subject || "",
+          lectureNumber: lectureNumber || 1,
+          facultyid: facultyId || "",
+          class: classYear || "",
+          division: division || "",
+          sessionType: sessionType || "Lecture",
+        })
+      );
+      
+      // Wait for all database operations to complete
+      await Promise.all(savePromises);
+      
       // Remove isMarked field before saving
       const cleanStudents = currentStudents.map(({isMarked, ...student}) => student);
       onSave(cleanStudents as Student[]);
+    } catch (error) {
+      console.error("Error saving attendance:", error);
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   };
 
   return (
