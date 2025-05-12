@@ -18,16 +18,13 @@ interface SelectionData {
   facultyId: string;
 }
 
-
-
 // Mock data - in a real app, you would fetch this from an API
 const mockStudents: Student[] = Array.from({ length: 50 }, (_, i) => {
   const num = i + 1;
-  const paddedNum = num.toString().padStart(3, '0');
   return {
     id: `student-${num}`,
     name: `Student ${num}`,
-    rollNo: `CS${paddedNum}`,
+    rollNo: num, // Changed from string format to number to match Student interface
     isPresent: false, // All students marked absent by default
     isMarked: false,  // No students explicitly marked yet
   };
