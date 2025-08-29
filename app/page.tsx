@@ -46,6 +46,11 @@ export default function HomePage() {
                   Launch for Super Admin
                 </Button>
               </Link>
+              <Link href="/departmentHead" className="block">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors">
+                  Launch for Department Head
+                </Button>
+              </Link>
             </div>
           </>
         ) : (
@@ -70,6 +75,11 @@ export default function HomePage() {
               <Link href="/superAdmin" className="block">
                 <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md transition-colors">
                   Launch for Super Admin
+                </Button>
+              </Link>
+              <Link href="/departmentHead" className="block">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors">
+                  Launch for Department Head
                 </Button>
               </Link>
             </div>
