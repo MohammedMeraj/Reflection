@@ -3,7 +3,7 @@
 import { FC, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, BarChart3, Users, Building2, Settings, Shield } from "lucide-react";
+import { Home, BarChart3, UserPlus, Building2, Settings, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavigationItem {
@@ -24,9 +24,9 @@ const navigationItems: NavigationItem[] = [
     href: "/superAdmin/analytics",
   },
   {
-    icon: <Users size={18} />,
-    label: "Users",
-    href: "/superAdmin/users",
+    icon: <UserPlus size={18} />,
+    label: "Manage",
+    href: "/superAdmin/manage",
   },
   {
     icon: <Settings size={18} />,

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { SuperAdminNavigation } from "../_component/super-admin/Navigation";
+import { DepartmentHeadProvider } from "../_component/super-admin/DepartmentHeadContext";
+import { ConvexClientProvider } from "../ConvexClientProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,9 +17,13 @@ export default function SuperAdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-screen">
-      {children}
-      <SuperAdminNavigation />
-    </main>
+    <ConvexClientProvider>
+      <DepartmentHeadProvider>
+        <main className="min-h-screen">
+          {children}
+          <SuperAdminNavigation />
+        </main>
+      </DepartmentHeadProvider>
+    </ConvexClientProvider>
   );
 }

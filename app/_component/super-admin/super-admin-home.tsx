@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, Users, Building2, GraduationCap, AlertTriangle, Bell, BarChart3, Calendar, UserCheck, Shield } from "lucide-react";
+import { ChevronRight, Users, Building2, GraduationCap, AlertTriangle, Bell, BarChart3, Calendar, UserCheck, Shield, ToggleLeft, ToggleRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -15,6 +15,16 @@ interface DepartmentStats {
   defaulters: number;
 }
 
+interface DepartmentHead {
+  id: string;
+  name: string;
+  email: string;
+  department: string;
+  managementEnabled: boolean;
+  employeeId: string;
+  joinedDate: string;
+}
+
 interface SuperAdminDashboardProps {
   adminName: string;
   departments: DepartmentStats[];
@@ -22,6 +32,9 @@ interface SuperAdminDashboardProps {
   organizationType: string;
   logoSrc: string;
   notifications?: number;
+  realTimeStats?: any;
+  realTimeDepartmentHeads?: DepartmentHead[];
+  realTimeDepartments?: any[];
 }
 
 export const SuperAdminDashboard = ({
@@ -31,7 +44,12 @@ export const SuperAdminDashboard = ({
   organizationType,
   logoSrc,
   notifications = 0,
+  realTimeStats,
+  realTimeDepartmentHeads,
+  realTimeDepartments,
 }: SuperAdminDashboardProps) => {
+  // Use real-time data if available, otherwise use empty array
+  const displayedDepartmentHeads = realTimeDepartmentHeads || [];
   // Calculate aggregated stats
   const totalDepartments = departments.length;
   const totalFaculty = departments.reduce((total, dept) => total + dept.totalFaculty, 0);
@@ -230,6 +248,79 @@ export const SuperAdminDashboard = ({
             </Link>
           ))}
         </div>
+      </div>
+
+      {/* Department Heads */}
+      <div className="px-4 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-800">Department Heads</h3>
+          <Link href="/superAdmin/manage">
+            <span className="text-purple-600 text-sm font-medium">Manage All</span>
+          </Link>
+        </div>
+        
+        {displayedDepartmentHeads && displayedDepartmentHeads.length > 0 ? (
+          <div className="space-y-3">
+            {displayedDepartmentHeads.slice(0, 3).map((head: DepartmentHead) => (
+              <div key={head.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                        <Shield size={16} className="text-purple-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-800">{head.name}</h4>
+                        <p className="text-sm text-gray-600">{head.department}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center">
+                          <span className="text-xs text-gray-500 mr-1">ID:</span>
+                          <span className="text-sm text-gray-600">{head.employeeId}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          head.managementEnabled 
+                            ? 'bg-green-100 text-green-700' 
+                            : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {head.managementEnabled ? 'Management Enabled' : 'Management Disabled'}
+                        </span>
+                        <div className={`flex items-center p-1 rounded-full ${
+                          head.managementEnabled 
+                            ? 'bg-purple-600' 
+                            : 'bg-gray-300'
+                        }`}>
+                          {head.managementEnabled ? (
+                            <ToggleRight className="h-5 w-5 text-white" />
+                          ) : (
+                            <ToggleLeft className="h-5 w-5 text-gray-600" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 text-center">
+            <Shield size={32} className="text-gray-400 mx-auto mb-3" />
+            <h4 className="font-medium text-gray-800 mb-2">No Department Heads</h4>
+            <p className="text-sm text-gray-600 mb-4">Add department heads to manage different departments</p>
+            <Link 
+              href="/superAdmin/add-department-head"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
+            >
+              <Shield size={16} />
+              Add Department Head
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

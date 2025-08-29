@@ -1,5 +1,7 @@
 "use client"
 import { SuperAdminDashboard } from "@/app/_component/super-admin/super-admin-home";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 // Mock data for the super admin dashboard
 const mockDepartments = [
@@ -51,6 +53,22 @@ const mockDepartments = [
 ];
 
 export default function SuperAdminHome() {
+  // Get real-time data from Convex
+  const departmentHeads = useQuery(api.superAdmin.getAllDepartmentHeads);
+  const departments = useQuery(api.superAdmin.getAllDepartments);
+  const stats = useQuery(api.superAdmin.getDepartmentStats);
+
+  // Transform Convex data to match component interface
+  const transformedDepartmentHeads = departmentHeads?.map(head => ({
+    id: head._id,
+    name: head.name,
+    email: head.email,
+    department: head.department?.name || "No Department",
+    managementEnabled: head.managementEnabled,
+    employeeId: head.employeeId,
+    joinedDate: new Date(head.createdAt).toLocaleDateString(),
+  }));
+
   return (
     <main className="min-h-screen bg-slate-50">
       <SuperAdminDashboard 
@@ -60,6 +78,9 @@ export default function SuperAdminHome() {
         organizationType="Education Board"
         logoSrc="/api/placeholder/100/100" // Placeholder image
         notifications={12} // Show notification indicator
+        realTimeStats={stats}
+        realTimeDepartmentHeads={transformedDepartmentHeads}
+        realTimeDepartments={departments}
       />
     </main>
   );
