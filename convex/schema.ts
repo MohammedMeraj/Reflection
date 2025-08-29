@@ -15,8 +15,37 @@ export default defineSchema({
 
   // Existing students table (from the current structure)
   students: defineTable({
-    // Add student fields as needed
-  }),
+    rollNo: v.optional(v.number()),
+    organization: v.optional(v.string()),
+    prn: v.optional(v.number()),
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    picture: v.optional(v.string()),
+    currentClass: v.optional(v.number()),
+    currentDivision: v.optional(v.string()),
+    phone: v.optional(v.number()),
+    branch: v.optional(v.string()),
+  })
+    .index("by_prn", ["prn"])
+    .index("by_email", ["email"])
+    .index("by_roll_no", ["rollNo"]),
+
+  // Absent students table for attendance tracking
+  absentStudent: defineTable({
+    prn: v.number(),
+    subject: v.string(),
+    lectureNumber: v.number(),
+    facultyid: v.string(),
+    class: v.string(),
+    division: v.string(),
+    sessionType: v.string(),
+    createdAt: v.optional(v.number()),
+  })
+    .index("by_prn", ["prn"])
+    .index("by_faculty", ["facultyid"])
+    .index("by_subject", ["subject"])
+    .index("by_class_division", ["class", "division"])
+    .index("by_lecture", ["lectureNumber"]),
 
   // New departments table
   departments: defineTable({
