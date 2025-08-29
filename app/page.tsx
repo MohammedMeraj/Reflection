@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function HomePage() {
-  const router = useRouter();
   const [isMobile, setIsMobile] = useState(true);
   
   // Check if device width is less than 600px
@@ -24,11 +22,6 @@ export default function HomePage() {
     // Clean up
     return () => window.removeEventListener("resize", checkWidth);
   }, []);
-  
-  // Handle button click to redirect to faculty page
-  const handleLaunchFaculty = () => {
-    router.push("/faculty");
-  };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
@@ -42,12 +35,18 @@ export default function HomePage() {
               <Link href="https://github.com/MohammedMeraj/Reflection"><p className="text-amber-700 underline text-sm mt-1">View this project on GitHub</p></Link>
               
             </div>
-            <Button 
-              onClick={handleLaunchFaculty}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors"
-            >
-              Launch for faculty
-            </Button>
+            <div className="space-y-3">
+              <Link href="/faculty" className="block">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors">
+                  Launch for Faculty
+                </Button>
+              </Link>
+              <Link href="/superAdmin" className="block">
+                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md transition-colors">
+                  Launch for Super Admin
+                </Button>
+              </Link>
+            </div>
           </>
         ) : (
           <>
@@ -58,9 +57,21 @@ export default function HomePage() {
               <Link href="https://github.com/MohammedMeraj/Reflection"><p className="text-amber-700 underline text-sm mt-1">View this project on GitHub</p></Link>
               
             </div>
-            <div className="bg-blue-100 p-4 rounded-md">
+            <div className="bg-blue-100 p-4 rounded-md mb-4">
               <p className="text-blue-800 font-medium">Please switch to mobile width to continue</p>
               <p className="text-blue-700 text-sm mt-1">This application is optimized for mobile devices</p>
+            </div>
+            <div className="space-y-3">
+              <Link href="/faculty" className="block">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors">
+                  Launch for Faculty
+                </Button>
+              </Link>
+              <Link href="/superAdmin" className="block">
+                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md transition-colors">
+                  Launch for Super Admin
+                </Button>
+              </Link>
             </div>
           </>
         )}
