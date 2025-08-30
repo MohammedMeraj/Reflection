@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Bell, Shield, Users, Building2, Database, Eye, EyeOff, Save, Download, Upload } from "lucide-react";
+import { Settings, Bell, Shield, Database, Save, Download, Upload } from "lucide-react";
 
 interface SystemSettings {
   general: {

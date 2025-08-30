@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Users, BookOpen, FlaskConical, Building2, Plus, Edit3, AlertTriangle } from "lucide-react";
+import { Users, BookOpen, FlaskConical, Building2, Edit3, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Faculty {

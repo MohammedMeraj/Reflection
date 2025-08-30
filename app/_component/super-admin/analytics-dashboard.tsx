@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Building2, Users, TrendingUp, TrendingDown, Calendar, BarChart3, PieChart, Activity } from "lucide-react";
+import { TrendingUp, TrendingDown, BarChart3, PieChart, Activity } from "lucide-react";
 import {
   LineChart,
   Line,

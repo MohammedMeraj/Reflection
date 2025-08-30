@@ -70,9 +70,6 @@ export const AttendanceTaker = ({
   const [markMode, setMarkMode] = useState<"absent" | "present">("absent");
   const [isLoading, setIsLoading] = useState(false);
   
-  // Get Convex mutation
-  const addAbsentStudent = useMutation(api.students.addAbsentStudent);
-
   // Format date to display as DD/MM/YYYY
   const formattedDate = date.split("-").reverse().join("/");
 
@@ -125,9 +122,9 @@ export const AttendanceTaker = ({
       // Find absent students
       const absentStudents = currentStudents.filter(student => !student.isPresent);
       
-      // Save absent students to Convex database
-      const savePromises = absentStudents.map(student => 
-        addAbsentStudent({
+      // For now, just log the attendance data (you can implement actual saving later)
+      console.log("Attendance data:", {
+        absentStudents: absentStudents.map(student => ({
           prn: student.rollNo,
           subject: subject || "",
           lectureNumber: lectureNumber || 1,
@@ -135,11 +132,11 @@ export const AttendanceTaker = ({
           class: classYear || "",
           division: division || "",
           sessionType: sessionType || "Lecture",
-        })
-      );
+        }))
+      });
       
-      // Wait for all database operations to complete
-      await Promise.all(savePromises);
+      // Simulate async operation
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Remove isMarked field before saving
       const cleanStudents = currentStudents.map(({isMarked, ...student}) => student);

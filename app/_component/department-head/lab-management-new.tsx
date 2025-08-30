@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, FlaskConical, Users, Hash, Edit3, Trash2, Search, BookOpen, Check, Lock } from "lucide-react";
+import { Plus, FlaskConical, Hash, Edit3, Trash2, Search, BookOpen, Check, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
