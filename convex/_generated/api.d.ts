@@ -13,8 +13,11 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as classes_simple from "../classes-simple.js";
+import type * as classes from "../classes.js";
 import type * as faculty from "../faculty.js";
-import type * as students from "../students.js";
+import type * as labs_simple from "../labs-simple.js";
+import type * as labs from "../labs.js";
 import type * as superAdmin from "../superAdmin.js";
 
 /**
@@ -26,8 +29,11 @@ import type * as superAdmin from "../superAdmin.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  "classes-simple": typeof classes_simple;
+  classes: typeof classes;
   faculty: typeof faculty;
-  students: typeof students;
+  "labs-simple": typeof labs_simple;
+  labs: typeof labs;
   superAdmin: typeof superAdmin;
 }>;
 export declare const api: FilterApi<

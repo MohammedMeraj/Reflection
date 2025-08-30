@@ -2,82 +2,227 @@
 
 import { useState } from "react";
 import { FacultyManagement } from "@/app/_component/department-head/faculty-management";
-
-// Mock data
-const mockFacultyList = [
-  {
-    id: "FAC_DRJD_001",
-    name: "Dr. John Doe",
-    email: "john.doe@example.com",
-    assignedClasses: ["CLS_FIR24_2024", "CLS_SEC24_2025"]
-  },
-  {
-    id: "FAC_MSJS_002", 
-    name: "Ms. Jane Smith",
-    email: "jane.smith@example.com",
-    assignedClasses: ["CLS_THI24_2026"]
-  },
-  {
-    id: "FAC_PRMI_003",
-    name: "Prof. Mike Johnson",
-    email: "mike.johnson@example.com",
-    assignedClasses: []
-  }
-];
-
-const mockClassList = [
-  {
-    id: "CLS_FIR24_2024",
-    name: "First Year",
-    year: "2024-25"
-  },
-  {
-    id: "CLS_SEC24_2025",
-    name: "Second Year",
-    year: "2024-25"
-  },
-  {
-    id: "CLS_THI24_2026",
-    name: "Third Year",
-    year: "2024-25"
-  }
-];
-
-const generateFacultyId = (name: string, email: string) => {
-  const namePrefix = name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
-  const emailPrefix = email.split('@')[0].slice(0, 3).toUpperCase();
-  const timestamp = Date.now().toString().slice(-4);
-  return `FAC_${namePrefix}${emailPrefix}_${timestamp}`;
-};
+import { useMutation, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 
 export default function FacultyPage() {
-  const [facultyList, setFacultyList] = useState(mockFacultyList);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleAddFaculty = (faculty: Omit<typeof mockFacultyList[0], 'id'>) => {
-    const newFaculty = {
-      ...faculty,
-      id: generateFacultyId(faculty.name, faculty.email)
-    };
-    setFacultyList([...facultyList, newFaculty]);
+  // Convex queries
+  const facultyList = useQuery(api.faculty.getAllFaculty, {}) || [];
+  const classList = useQuery(api.classes.getAllClasses) || [];
+
+  // Convex mutations
+  const addFacultyMutation = useMutation(api.faculty.createFaculty);
+  const updateFacultyMutation = useMutation(api.faculty.updateFaculty);
+  const deleteFacultyMutation = useMutation(api.faculty.deleteFaculty);
+  const assignCoordinatorMutation = useMutation(api.faculty.assignClassCoordinator);
+  const removeCoordinatorMutation = useMutation(api.faculty.removeClassCoordinator);
+
+  const handleAddFaculty = async (faculty: {
+    name: string;
+    email: string;
+    assignedClasses: string[];
+    qualification?: string;
+  }) => {
+    try {
+      setIsLoading(true);
+      
+      // Convert string IDs to Convex IDs
+      const assignedClassIds = faculty.assignedClasses
+        .map(classId => {
+          const classItem = classList.find(cls => cls.classId === classId);
+          return classItem ? classItem._id : null;
+        })
+        .filter(Boolean) as Id<"classes">[];
+
+      await addFacultyMutation({
+        name: faculty.name,
+        email: faculty.email,
+        assignedClasses: assignedClassIds,
+        qualification: faculty.qualification,
+      });
+
+      console.log("✅ Faculty added successfully");
+    } catch (error) {
+      console.error("❌ Error adding faculty:", error);
+      alert(`Error adding faculty: ${error}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleUpdateFaculty = (id: string, updates: Partial<typeof mockFacultyList[0]>) => {
-    setFacultyList(facultyList.map(faculty => 
-      faculty.id === id ? { ...faculty, ...updates } : faculty
-    ));
+  const handleUpdateFaculty = async (id: string, updates: {
+    name?: string;
+    email?: string;
+    assignedClasses?: string[];
+    qualification?: string;
+  }) => {
+    try {
+      setIsLoading(true);
+      
+      // Find the faculty by facultyId
+      const faculty = facultyList.find((f: any) => f.facultyId === id);
+      if (!faculty) {
+        throw new Error("Faculty not found");
+      }
+
+      // Convert string IDs to Convex IDs if assignedClasses is being updated
+      const updateData: any = { ...updates };
+      if (updates.assignedClasses) {
+        updateData.assignedClasses = updates.assignedClasses
+          .map(classId => {
+            const classItem = classList.find(cls => cls.classId === classId);
+            return classItem ? classItem._id : null;
+          })
+          .filter(Boolean) as Id<"classes">[];
+      }
+
+      await updateFacultyMutation({
+        id: faculty._id,
+        ...updateData,
+      });
+
+      console.log("✅ Faculty updated successfully");
+    } catch (error) {
+      console.error("❌ Error updating faculty:", error);
+      alert(`Error updating faculty: ${error}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDeleteFaculty = (id: string) => {
-    setFacultyList(facultyList.filter(faculty => faculty.id !== id));
+  const handleDeleteFaculty = async (id: string) => {
+    try {
+      setIsLoading(true);
+      
+      // Find the faculty by facultyId
+      const faculty = facultyList.find((f: any) => f.facultyId === id);
+      if (!faculty) {
+        throw new Error("Faculty not found");
+      }
+
+      await deleteFacultyMutation({ id: faculty._id });
+      console.log("✅ Faculty deleted successfully");
+    } catch (error) {
+      console.error("❌ Error deleting faculty:", error);
+      alert(`Error deleting faculty: ${error}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const handleAssignCoordinator = async (facultyId: string, target: {
+    type: "class" | "division";
+    classId?: string;
+    divisionId?: string;
+  }) => {
+    try {
+      setIsLoading(true);
+      
+      // Find the faculty by facultyId
+      const faculty = facultyList.find((f: any) => f.facultyId === facultyId);
+      if (!faculty) {
+        throw new Error("Faculty not found");
+      }
+
+      let coordinatorTarget;
+      if (target.type === "class" && target.classId) {
+        const classItem = classList.find(cls => cls.classId === target.classId);
+        if (!classItem) throw new Error("Class not found");
+        coordinatorTarget = {
+          type: "class" as const,
+          classId: classItem._id
+        };
+      } else if (target.type === "division" && target.divisionId) {
+        // Find division by divisionId across all classes
+        let division = null;
+        for (const cls of classList) {
+          division = cls.divisions.find((div: any) => div.divisionId === target.divisionId);
+          if (division) break;
+        }
+        if (!division) throw new Error("Division not found");
+        coordinatorTarget = {
+          type: "division" as const,
+          divisionId: division.id
+        };
+      } else {
+        throw new Error("Invalid coordinator target");
+      }
+
+      await assignCoordinatorMutation({
+        facultyId: faculty._id,
+        target: coordinatorTarget,
+      });
+
+      console.log("✅ Coordinator assigned successfully");
+    } catch (error) {
+      console.error("❌ Error assigning coordinator:", error);
+      alert(`Error assigning coordinator: ${error}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRemoveCoordinator = async (facultyId: string) => {
+    try {
+      setIsLoading(true);
+      
+      // Find the faculty by facultyId
+      const faculty = facultyList.find((f: any) => f.facultyId === facultyId);
+      if (!faculty) {
+        throw new Error("Faculty not found");
+      }
+
+      await removeCoordinatorMutation({ facultyId: faculty._id });
+      console.log("✅ Coordinator removed successfully");
+    } catch (error) {
+      console.error("❌ Error removing coordinator:", error);
+      alert(`Error removing coordinator: ${error}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Transform data for component compatibility
+  const transformedFacultyList = facultyList.map((faculty: any) => ({
+    id: faculty.facultyId,
+    name: faculty.name,
+    email: faculty.email,
+    assignedClasses: faculty.assignedClassesInfo?.map((cls: any) => cls.classId) || [],
+    coordinatorInfo: faculty.coordinatorInfo,
+    isClassCoordinator: faculty.isClassCoordinator,
+  }));
+
+  const transformedClassList = classList.map(cls => ({
+    id: cls.classId,
+    name: cls.name,
+    year: cls.year,
+    divisions: cls.divisions.map((div: any) => ({
+      id: div.divisionId,
+      name: div.name,
+      classId: cls.classId,
+    })),
+  }));
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <FacultyManagement 
-      facultyList={facultyList}
-      classList={mockClassList}
+      facultyList={transformedFacultyList}
+      classList={transformedClassList}
       onAddFaculty={handleAddFaculty}
       onUpdateFaculty={handleUpdateFaculty}
       onDeleteFaculty={handleDeleteFaculty}
+      onAssignCoordinator={handleAssignCoordinator}
+      onRemoveCoordinator={handleRemoveCoordinator}
     />
   );
 }

@@ -3,60 +3,12 @@ import { SuperAdminDashboard } from "@/app/_component/super-admin/super-admin-ho
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
-// Mock data for the super admin dashboard
-const mockDepartments = [
-  {
-    id: "dept-1",
-    name: "Computer Science & Engineering",
-    totalFaculty: 25,
-    totalStudents: 450,
-    averageAttendance: 84,
-    lowAttendanceClasses: 3,
-    defaulters: 35,
-  },
-  {
-    id: "dept-2",
-    name: "Information Technology",
-    totalFaculty: 20,
-    totalStudents: 380,
-    averageAttendance: 78,
-    lowAttendanceClasses: 5,
-    defaulters: 42,
-  },
-  {
-    id: "dept-3",
-    name: "Electronics & Communication",
-    totalFaculty: 18,
-    totalStudents: 320,
-    averageAttendance: 82,
-    lowAttendanceClasses: 2,
-    defaulters: 28,
-  },
-  {
-    id: "dept-4",
-    name: "Mechanical Engineering",
-    totalFaculty: 22,
-    totalStudents: 400,
-    averageAttendance: 76,
-    lowAttendanceClasses: 4,
-    defaulters: 48,
-  },
-  {
-    id: "dept-5",
-    name: "Civil Engineering",
-    totalFaculty: 16,
-    totalStudents: 280,
-    averageAttendance: 80,
-    lowAttendanceClasses: 3,
-    defaulters: 32,
-  },
-];
-
 export default function SuperAdminHome() {
   // Get real-time data from Convex
   const departmentHeads = useQuery(api.superAdmin.getAllDepartmentHeads);
   const departments = useQuery(api.superAdmin.getAllDepartments);
   const stats = useQuery(api.superAdmin.getDepartmentStats);
+  const departmentOverview = useQuery(api.superAdmin.getDepartmentOverview);
 
   // Transform Convex data to match component interface
   const transformedDepartmentHeads = departmentHeads?.map(head => ({
@@ -69,15 +21,45 @@ export default function SuperAdminHome() {
     joinedDate: new Date(head.createdAt).toLocaleDateString(),
   }));
 
+  // Transform department overview data for the dashboard
+  const transformedDepartments = departmentOverview?.map(dept => ({
+    id: dept.id,
+    name: dept.name,
+    totalFaculty: dept.totalFaculty,
+    totalStudents: dept.totalStudents,
+    averageAttendance: dept.averageAttendance,
+    lowAttendanceClasses: dept.lowAttendanceClasses,
+    defaulters: dept.defaulters,
+  })) || [];
+
+  // Show loading state while data is being fetched
+  if (departmentOverview === undefined || departmentHeads === undefined || stats === undefined) {
+    return (
+      <main className="min-h-screen bg-slate-50">
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading dashboard data...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-slate-50">
       <SuperAdminDashboard 
         adminName="System Administrator"
-        departments={mockDepartments}
+        departments={transformedDepartments}
         organizationName="Maharashtra State Board of Technical Education"
         organizationType="Education Board"
         logoSrc="/api/placeholder/100/100" // Placeholder image
-        notifications={12} // Show notification indicator
+        notifications={
+          // Calculate total defaulters across all departments as notification count
+          transformedDepartments.length > 0 
+            ? transformedDepartments.reduce((sum, dept) => sum + dept.defaulters, 0) 
+            : 0
+        }
         realTimeStats={stats}
         realTimeDepartmentHeads={transformedDepartmentHeads}
         realTimeDepartments={departments}

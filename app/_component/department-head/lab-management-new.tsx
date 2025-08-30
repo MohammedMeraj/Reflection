@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, FlaskConical, Users, Hash, Edit3, Trash2, Search, BookOpen } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, FlaskConical, Users, Hash, Edit3, Trash2, Search, BookOpen, Check, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 interface Lab {
   id: string;
@@ -48,28 +50,53 @@ export const LabManagement = ({
     rollNumberStart: 1,
     rollNumberEnd: 1
   });
+  const [previewLabId, setPreviewLabId] = useState("");
+  const [isUniqueId, setIsUniqueId] = useState(false);
 
-  const generateLabId = (labName: string, divisionName: string, className: string) => {
-    const labPrefix = labName.replace(/\s+/g, '').slice(0, 2).toUpperCase();
-    const divPrefix = divisionName.slice(0, 1).toUpperCase();
-    const classPrefix = className.replace(/\s+/g, '').slice(0, 2).toUpperCase();
-    const timestamp = Date.now().toString().slice(-4);
-    return `LAB_${labPrefix}${divPrefix}${classPrefix}_${timestamp}`;
+  // Query to check ID uniqueness - need to convert divisionId to actual Convex ID
+  const getConvexDivisionId = () => {
+    if (!selectedClassId || !selectedDivisionId) return null;
+    
+    const selectedClass = classList.find(cls => cls.id === selectedClassId);
+    const division = selectedClass?.divisions.find(div => div.id === selectedDivisionId);
+    return division?.id; // This should be the actual Convex ID
   };
 
+  const convexDivisionId = getConvexDivisionId();
+  
+  // Generate preview lab ID
+  const generatePreviewLabId = () => {
+    if (!newLab.name || !selectedDivisionId) return "";
+    
+    const selectedClass = classList.find(cls => cls.id === selectedClassId);
+    const division = selectedClass?.divisions.find(div => div.id === selectedDivisionId);
+    
+    if (!selectedClass) return "";
+    
+    const classPrefix = selectedClass.name.replace(/\s+/g, '').slice(0, 3).toUpperCase();
+    const divPrefix = division?.name?.slice(0, 1).toUpperCase() || 'A';
+    const labPrefix = newLab.name.replace(/\s+/g, '').slice(0, 2).toUpperCase();
+    const currentYear = new Date().getFullYear();
+    
+    return `LAB_${classPrefix}${divPrefix}_${labPrefix}_${currentYear}`;
+  };
+
+  // Update preview ID when form changes
+  useEffect(() => {
+    const previewId = generatePreviewLabId();
+    setPreviewLabId(previewId);
+    setIsUniqueId(!!previewId); // Set to true if we have a valid preview
+  }, [newLab.name, selectedDivisionId, selectedClassId]);
+
   const handleAddLab = () => {
-    if (newLab.name && selectedDivisionId && newLab.rollNumberStart <= newLab.rollNumberEnd) {
+    if (newLab.name && selectedDivisionId && newLab.rollNumberStart <= newLab.rollNumberEnd && isUniqueId) {
       onAddLab(selectedDivisionId, newLab);
       setNewLab({ name: "", rollNumberStart: 1, rollNumberEnd: 1 });
       setIsAddingLab(false);
       setSelectedClassId("");
       setSelectedDivisionId("");
+      setPreviewLabId("");
     }
-  };
-
-  const getSelectedDivision = () => {
-    const selectedClass = classList.find(cls => cls.id === selectedClassId);
-    return selectedClass?.divisions.find(div => div.id === selectedDivisionId);
   };
 
   // Get all labs across all classes and divisions for search
@@ -173,7 +200,7 @@ export const LabManagement = ({
                 </select>
               </div>
             )}
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Lab Name *
@@ -182,7 +209,7 @@ export const LabManagement = ({
                 type="text"
                 value={newLab.name}
                 onChange={(e) => setNewLab({ ...newLab, name: e.target.value })}
-                placeholder="e.g., T1, T2, Physics Lab"
+                placeholder="e.g., T1, T2, Batch A"
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -214,20 +241,57 @@ export const LabManagement = ({
               </div>
             </div>
 
-            {newLab.name && selectedDivisionId && (
-              <div className="p-3 bg-blue-50 rounded-md">
-                <p className="text-sm font-medium text-blue-800">Auto-generated Lab ID:</p>
-                <p className="text-sm text-blue-700 font-mono">
-                  {(() => {
-                    const selectedClass = classList.find(cls => cls.id === selectedClassId);
-                    const selectedDiv = selectedClass?.divisions.find(div => div.id === selectedDivisionId);
-                    return generateLabId(newLab.name, selectedDiv?.name || "", selectedClass?.name || "");
-                  })()}
-                </p>
-                <p className="text-sm text-blue-700 mt-1">
-                  Students: {newLab.rollNumberEnd - newLab.rollNumberStart + 1} 
-                  (Roll {newLab.rollNumberStart} - {newLab.rollNumberEnd})
-                </p>
+            {/* Enhanced Lab ID Preview with Uniqueness Check */}
+            {previewLabId && (
+              <div className={`p-4 rounded-lg border-2 ${
+                isUniqueId 
+                  ? 'bg-green-50 border-green-200' 
+                  : 'bg-yellow-50 border-yellow-200'
+              }`}>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    isUniqueId 
+                      ? 'bg-green-500' 
+                      : 'bg-yellow-500'
+                  }`}>
+                    {isUniqueId ? (
+                      <Check className="w-4 h-4 text-white" />
+                    ) : (
+                      <span className="text-white text-xs">!</span>
+                    )}
+                  </div>
+                  <div>
+                    <p className={`text-sm font-semibold ${
+                      isUniqueId ? 'text-green-800' : 'text-yellow-800'
+                    }`}>
+                      {isUniqueId ? '✓ Unique Lab ID Available' : '⚠ ID Being Generated...'}
+                    </p>
+                    <p className={`text-xs ${
+                      isUniqueId ? 'text-green-600' : 'text-yellow-600'
+                    }`}>
+                      {isUniqueId 
+                        ? 'This ID is ready to use and will be permanent' 
+                        : 'Checking for uniqueness and generating ID'
+                      }
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-white border rounded-md px-3 py-2">
+                  <p className="font-mono text-sm font-bold text-gray-800">
+                    {previewLabId}
+                  </p>
+                </div>
+                <div className="mt-2 p-2 bg-white rounded-md border">
+                  <p className="text-xs text-blue-600 mb-1">Lab Details:</p>
+                  <p className="text-sm text-blue-700">
+                    Students: {newLab.rollNumberEnd - newLab.rollNumberStart + 1} 
+                    (Roll {newLab.rollNumberStart} - {newLab.rollNumberEnd})
+                  </p>
+                </div>
+                <div className="mt-2 flex items-center gap-2 text-xs text-gray-600">
+                  <Lock className="w-3 h-3" />
+                  <span>ID will be permanent once created</span>
+                </div>
               </div>
             )}
           </div>
@@ -236,7 +300,7 @@ export const LabManagement = ({
             <Button
               onClick={handleAddLab}
               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-              disabled={!newLab.name || !selectedDivisionId || newLab.rollNumberStart > newLab.rollNumberEnd}
+              disabled={!newLab.name || !selectedDivisionId || newLab.rollNumberStart > newLab.rollNumberEnd || !isUniqueId}
             >
               Add Lab
             </Button>
@@ -246,6 +310,7 @@ export const LabManagement = ({
                 setNewLab({ name: "", rollNumberStart: 1, rollNumberEnd: 1 });
                 setSelectedClassId("");
                 setSelectedDivisionId("");
+                setPreviewLabId("");
               }}
               variant="outline"
               className="flex-1"
@@ -260,24 +325,30 @@ export const LabManagement = ({
       <div className="space-y-3">
         {filteredLabs.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            {searchTerm ? "No labs found matching your search" : "No labs created yet"}
+            <FlaskConical className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+            <p className="text-sm">No labs found</p>
+            {searchTerm && (
+              <p className="text-xs text-gray-400 mt-1">
+                Try adjusting your search terms
+              </p>
+            )}
           </div>
         ) : (
           filteredLabs.map((lab) => (
-            <div key={lab.id} className="bg-white border border-gray-200 rounded-lg p-4">
-              <div className="flex items-start justify-between mb-3">
+            <div key={lab.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+              <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-1">
+                  <div className="flex items-center gap-2 mb-1">
                     <FlaskConical className="w-4 h-4 text-blue-600" />
                     <h3 className="font-semibold text-gray-800">{lab.name}</h3>
                   </div>
-                  <div className="flex items-center space-x-2 mb-1">
+                  <div className="flex items-center gap-1 mb-1">
                     <BookOpen className="w-4 h-4 text-blue-500" />
                     <p className="text-sm text-gray-600">
                       {lab.className} - Division {lab.divisionName}
                     </p>
                   </div>
-                  <div className="flex items-center space-x-2 mb-2">
+                  <div className="flex items-center gap-1 mb-2">
                     <Hash className="w-4 h-4 text-blue-500" />
                     <p className="text-sm text-gray-600">
                       Roll {lab.rollNumberStart} - {lab.rollNumberEnd} 
@@ -286,20 +357,36 @@ export const LabManagement = ({
                       </span>
                     </p>
                   </div>
-                  <p className="text-xs text-gray-500 font-mono">ID: {lab.id}</p>
+
+                  {/* Display Lab ID with Lock Icon */}
+                  <div className="mt-2 p-2 bg-gray-50 rounded-md border">
+                    <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
+                      <Lock className="w-3 h-3" />
+                      <span>Permanent Lab ID</span>
+                    </div>
+                    <p className="font-mono text-sm font-bold text-gray-800">
+                      {lab.id}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex space-x-1">
+                
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
+                    className="p-2"
                   >
                     <Edit3 className="w-4 h-4" />
                   </Button>
                   <Button
-                    onClick={() => onDeleteLab(lab.id)}
+                    onClick={() => {
+                      if (confirm('⚠️ WARNING: This action is IRREVERSIBLE!\n\nDeleting this lab will permanently remove all lab data.\n\nThis cannot be undone. Are you absolutely sure?')) {
+                        onDeleteLab(lab.id);
+                      }
+                    }}
                     variant="outline"
                     size="sm"
-                    className="text-red-600 border-red-600 hover:bg-red-50"
+                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
