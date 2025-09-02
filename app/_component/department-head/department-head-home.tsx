@@ -191,11 +191,11 @@ export const DepartmentHeadDashboard = ({
         <h2 className="text-lg font-semibold text-gray-800 mb-3">Quick Actions</h2>
         <div className="grid grid-cols-2 gap-3">
           <Button
-            onClick={() => setActiveSection('faculty')}
-            className="flex items-center space-x-2 h-12 bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <Users className="w-5 h-5" />
-            <span>Manage Faculty</span>
+              onClick={() => setActiveSection('faculty')}
+              className="flex items-center space-x-2 h-12 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Users className="w-5 h-5" />
+              <span>Manage Faculty</span>
           </Button>
           <Button
             onClick={() => setActiveSection('classes')}

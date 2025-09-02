@@ -156,33 +156,39 @@ export const FacultyManagement = ({
   );
 
   return (
-    <div className="p-4 max-w-md mx-auto space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-800">Faculty Management</h1>
-        <Button
-          onClick={() => setIsAddingFaculty(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
-          size="sm"
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Add Faculty
-        </Button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+        <div className="p-4 max-w-md mx-auto">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-bold text-gray-800">Faculty Management</h1>
+            <Button
+              onClick={() => setIsAddingFaculty(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              size="sm"
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Add Faculty
+            </Button>
+          </div>
+
+          {/* Search */}
+          <div className="relative mt-4">
+            <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search faculty..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search faculty..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
-      </div>
-
-      {/* Add Faculty Form */}
+      {/* Scrollable Content */}
+      <div className="p-4 max-w-md mx-auto space-y-4">
+        {/* Add Faculty Form */}
       {isAddingFaculty && (
         <div className="bg-white border-2 border-blue-200 rounded-lg p-4 space-y-4">
           <h3 className="font-semibold text-gray-800">Add New Faculty</h3>
@@ -532,6 +538,7 @@ export const FacultyManagement = ({
             </div>
           ))
         )}
+      </div>
       </div>
     </div>
   );

@@ -259,33 +259,39 @@ export const LabManagement = () => {
   );
 
   return (
-    <SmoothScrollContainer className="p-4 max-w-4xl mx-auto space-y-4 min-h-screen">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-800">Lab Management</h1>
-        <Button
-          onClick={() => setIsAddingLab(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
-          size="sm"
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Add Lab
-        </Button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+        <div className="p-4 max-w-4xl mx-auto">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-bold text-gray-800">Lab Management</h1>
+            <Button
+              onClick={() => setIsAddingLab(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              size="sm"
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Add Lab
+            </Button>
+          </div>
+          
+          {/* Search */}
+          <div className="relative mt-4">
+            <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search labs..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search labs..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
-      </div>
-
-      {/* Add Lab Dialog */}
+      {/* Scrollable Content */}
+      <SmoothScrollContainer className="p-4 max-w-4xl mx-auto space-y-4">
+        {/* Add Lab Dialog */}
       {isAddingLab && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 space-y-4">
@@ -705,5 +711,6 @@ export const LabManagement = () => {
         )}
       </div>
     </SmoothScrollContainer>
+    </div>
   );
 };
