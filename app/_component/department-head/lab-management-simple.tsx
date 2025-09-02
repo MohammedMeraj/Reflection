@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, FlaskConical, Search, Check, Lock, X } from "lucide-react";
+import { Plus, FlaskConical, Search, Check, Lock, X, Edit3, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SmoothScrollContainer } from "@/components/ui/smooth-scroll-container";
 import { useQuery, useMutation } from "convex/react";
@@ -44,12 +44,25 @@ export const LabManagement = () => {
   const [rollNumberEnd, setRollNumberEnd] = useState(30);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Edit functionality state
+  const [isEditingLab, setIsEditingLab] = useState(false);
+  const [editingLabId, setEditingLabId] = useState<string | null>(null);
+  const [editLabName, setEditLabName] = useState("");
+  const [editRollNumberStart, setEditRollNumberStart] = useState(1);
+  const [editRollNumberEnd, setEditRollNumberEnd] = useState(30);
+
+  // Delete confirmation state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [labToDelete, setLabToDelete] = useState<{id: string, name: string} | null>(null);
+
   // Convex queries
   const classList = useQuery(api.classes.getAllClasses) || [];
   const allLabs = useQuery(api.labs.getAllLabs, {}) || [];
 
   // Convex mutations
   const createLabMutation = useMutation(api.labs.createLab);
+  const updateLabMutation = useMutation(api.labs.updateLab);
+  const deleteLabMutation = useMutation(api.labs.deleteLab);
 
   // Get selected class details
   const selectedClass = classList.find(cls => cls._id === selectedClassId);
@@ -165,6 +178,77 @@ export const LabManagement = () => {
     setRollNumberStart(1);
     setRollNumberEnd(30);
     setIsAddingLab(false);
+  };
+
+  const handleEditLab = (lab: Lab) => {
+    setEditingLabId(lab._id);
+    setEditLabName(lab.name);
+    setEditRollNumberStart(lab.rollNumberStart);
+    setEditRollNumberEnd(lab.rollNumberEnd);
+    setIsEditingLab(true);
+  };
+
+  const handleUpdateLab = async () => {
+    if (!editingLabId || !editLabName || editRollNumberStart > editRollNumberEnd) {
+      alert("Please fill all fields correctly");
+      return;
+    }
+
+    try {
+      await updateLabMutation({
+        labId: editingLabId as Id<"labs">,
+        name: editLabName,
+        rollNumberStart: editRollNumberStart,
+        rollNumberEnd: editRollNumberEnd,
+      });
+
+      // Reset edit state
+      setIsEditingLab(false);
+      setEditingLabId(null);
+      setEditLabName("");
+      setEditRollNumberStart(1);
+      setEditRollNumberEnd(30);
+
+      alert("Lab updated successfully!");
+    } catch (error) {
+      console.error("Error updating lab:", error);
+      alert(`Error updating lab: ${error}`);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingLab(false);
+    setEditingLabId(null);
+    setEditLabName("");
+    setEditRollNumberStart(1);
+    setEditRollNumberEnd(30);
+  };
+
+  const handleDeleteLab = (labId: string, labName: string) => {
+    setLabToDelete({ id: labId, name: labName });
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteLab = async () => {
+    if (!labToDelete) return;
+    
+    try {
+      await deleteLabMutation({
+        labId: labToDelete.id as Id<"labs">
+      });
+      
+      setIsDeleteDialogOpen(false);
+      setLabToDelete(null);
+      alert("Lab deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting lab:", error);
+      alert(`Error deleting lab: ${error}`);
+    }
+  };
+
+  const cancelDeleteLab = () => {
+    setIsDeleteDialogOpen(false);
+    setLabToDelete(null);
   };
 
   // Filter labs for search
@@ -362,6 +446,188 @@ export const LabManagement = () => {
         </div>
       )}
 
+      {/* Delete Confirmation Dialog */}
+      {isDeleteDialogOpen && labToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-md mx-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-red-100 rounded-full">
+                  <Trash2 className="w-5 h-5 text-red-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">Delete Lab</h3>
+              </div>
+              <Button
+                onClick={cancelDeleteLab}
+                variant="outline"
+                size="sm"
+                className="p-1"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              <div className="space-y-4">
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="p-1 bg-red-100 rounded-full mt-0.5">
+                      <svg className="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-red-800 mb-1">Warning: This action cannot be undone!</h4>
+                      <p className="text-sm text-red-700">
+                        This action is permanent and irreversible.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-gray-700 mb-3">
+                    You are about to permanently delete the lab:
+                  </p>
+                  <div className="p-3 bg-gray-50 border rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <FlaskConical className="w-4 h-4 text-blue-600" />
+                      <span className="font-semibold text-gray-900">{labToDelete.name}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-sm text-gray-600">
+                  <p className="font-medium text-gray-700">This will permanently remove:</p>
+                  <ul className="space-y-1 pl-4">
+                    <li className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
+                      All lab data and configuration
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
+                      Student roll number assignments
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
+                      Associated lab records
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex flex-col sm:flex-row gap-3 p-6 bg-gray-50 rounded-b-lg">
+              <Button
+                onClick={cancelDeleteLab}
+                variant="outline"
+                className="flex-1 order-2 sm:order-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmDeleteLab}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white order-1 sm:order-2"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Permanently
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Lab Dialog */}
+      {isEditingLab && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-800">Edit Lab</h3>
+              <Button
+                onClick={handleCancelEdit}
+                variant="outline"
+                size="sm"
+                className="p-1"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Lab Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Lab Name *
+                </label>
+                <input
+                  type="text"
+                  value={editLabName}
+                  onChange={(e) => setEditLabName(e.target.value)}
+                  placeholder="e.g., Batch A, Lab 1, Morning Shift"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Roll Number Range */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Roll Start *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={editRollNumberStart}
+                    onChange={(e) => setEditRollNumberStart(parseInt(e.target.value) || 1)}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Roll End *
+                  </label>
+                  <input
+                    type="number"
+                    min={editRollNumberStart}
+                    value={editRollNumberEnd}
+                    onChange={(e) => setEditRollNumberEnd(parseInt(e.target.value) || editRollNumberStart)}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {/* Warning about range conflicts */}
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                <p className="text-sm text-yellow-800">
+                  <strong>Note:</strong> Changing roll number ranges may cause conflicts with existing labs. 
+                  The system will check for overlaps before saving.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex space-x-2 pt-4">
+              <Button
+                onClick={handleUpdateLab}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                disabled={!editLabName || editRollNumberStart > editRollNumberEnd}
+              >
+                Update Lab
+              </Button>
+              <Button
+                onClick={handleCancelEdit}
+                variant="outline"
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Lab List */}
       <div className="space-y-3">
         {filteredLabs.length === 0 ? (
@@ -377,42 +643,62 @@ export const LabManagement = () => {
         ) : (
           filteredLabs.map((lab) => (
             <div key={lab._id} className="bg-white border border-gray-200 rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <FlaskConical className="w-4 h-4 text-blue-600" />
-                    <h3 className="font-semibold text-gray-800">{lab.name}</h3>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                    <div>
-                      <span className="text-gray-500">Class:</span>
-                      <p className="font-medium">{lab.className}</p>
-                    </div>
-                    {lab.divisionName && (
-                      <div>
-                        <span className="text-gray-500">Division:</span>
-                        <p className="font-medium">{lab.divisionName}</p>
-                      </div>
-                    )}
-                    <div>
-                      <span className="text-gray-500">Roll Range:</span>
-                      <p className="font-medium">{lab.rollNumberStart}-{lab.rollNumberEnd}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Students:</span>
-                      <p className="font-medium">{lab.rollNumberEnd - lab.rollNumberStart + 1}</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-2 p-2 bg-gray-50 rounded-md">
-                    <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
-                      <Lock className="w-3 h-3" />
-                      <span>Lab ID</span>
-                    </div>
-                    <p className="font-mono text-sm font-bold text-gray-800">{lab.labId}</p>
-                  </div>
+              {/* Header with Lab Name and Action Buttons */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <FlaskConical className="w-4 h-4 text-blue-600" />
+                  <h3 className="font-semibold text-gray-800">{lab.name}</h3>
                 </div>
+                
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => handleEditLab(lab)}
+                    size="sm"
+                    variant="outline"
+                    className="p-2 hover:bg-blue-50"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    onClick={() => handleDeleteLab(lab._id, lab.name)}
+                    size="sm"
+                    variant="outline"
+                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Lab Details */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm mb-3">
+                <div>
+                  <span className="text-gray-500">Class:</span>
+                  <p className="font-medium">{lab.className}</p>
+                </div>
+                {lab.divisionName && (
+                  <div>
+                    <span className="text-gray-500">Division:</span>
+                    <p className="font-medium">{lab.divisionName}</p>
+                  </div>
+                )}
+                <div>
+                  <span className="text-gray-500">Roll Range:</span>
+                  <p className="font-medium">{lab.rollNumberStart}-{lab.rollNumberEnd}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Students:</span>
+                  <p className="font-medium">{lab.rollNumberEnd - lab.rollNumberStart + 1}</p>
+                </div>
+              </div>
+
+              {/* Lab ID */}
+              <div className="p-2 bg-gray-50 rounded-md">
+                <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
+                  <Lock className="w-3 h-3" />
+                  <span>Lab ID</span>
+                </div>
+                <p className="font-mono text-sm font-bold text-gray-800">{lab.labId}</p>
               </div>
             </div>
           ))
