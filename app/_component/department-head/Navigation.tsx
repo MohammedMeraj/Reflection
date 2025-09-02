@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { Home, Users, BookOpen, FlaskConical } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 
 export const MobileNavigation = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const { scrollToTop } = useSmoothScroll();
 
   const navItems = [
     { 
@@ -39,6 +42,14 @@ export const MobileNavigation = () => {
     },
   ];
 
+  const handleNavClick = (href: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    scrollToTop({ duration: 600, smooth: true });
+    setTimeout(() => {
+      router.push(href);
+    }, 100);
+  };
+
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2">
       <div className="flex justify-around max-w-md mx-auto">
@@ -50,6 +61,7 @@ export const MobileNavigation = () => {
             <Link
               key={item.name}
               href={item.href}
+              onClick={(e) => handleNavClick(item.href, e)}
               className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all duration-200 ${
                 isActive 
                   ? `${item.activeColor} font-bold transform scale-105`

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, FlaskConical, Search, Check, Lock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SmoothScrollContainer } from "@/components/ui/smooth-scroll-container";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -174,7 +175,7 @@ export const LabManagement = () => {
   );
 
   return (
-    <div className="p-4 max-w-4xl mx-auto space-y-4">
+    <SmoothScrollContainer className="p-4 max-w-4xl mx-auto space-y-4 min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-800">Lab Management</h1>
@@ -417,6 +418,6 @@ export const LabManagement = () => {
           ))
         )}
       </div>
-    </div>
+    </SmoothScrollContainer>
   );
 };

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Users, BookOpen, FlaskConical, Building2, Edit3, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SmoothScrollContainer } from "@/components/ui/smooth-scroll-container";
+import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 
 interface Faculty {
   id: string;
@@ -81,7 +83,7 @@ export const DepartmentHeadDashboard = ({
   ];
 
   return (
-    <div className="p-4 max-w-md mx-auto space-y-6">
+    <SmoothScrollContainer className="p-4 max-w-md mx-auto space-y-6 min-h-screen">
       {/* Header with Department Name */}
       <div className="bg-white rounded-lg p-4 shadow-sm">
         <div className="flex items-center justify-between mb-4">
@@ -239,6 +241,6 @@ export const DepartmentHeadDashboard = ({
           </div>
         </div>
       </div>
-    </div>
+    </SmoothScrollContainer>
   );
 };

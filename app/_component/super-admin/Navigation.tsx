@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Home, BarChart3, UserPlus, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 
 interface NavigationItem {
   icon: React.ReactNode;
@@ -39,16 +40,20 @@ export const SuperAdminNavigation: FC = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [clickedItem, setClickedItem] = useState<string | null>(null);
+  const { scrollToTop } = useSmoothScroll();
 
   const handleClick = (href: string, e: React.MouseEvent) => {
     e.preventDefault();
     setClickedItem(href);
     
-    // Navigate after animation completes
+    // Scroll to top smoothly, then navigate
+    scrollToTop({ duration: 600, smooth: true });
+    
+    // Navigate after scroll animation starts
     setTimeout(() => {
       router.push(href);
       setClickedItem(null);
-    }, 200);
+    }, 100);
   };
 
   return (

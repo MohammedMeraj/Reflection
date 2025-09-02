@@ -4,6 +4,8 @@ import { useState } from "react";
 import { ChevronRight, Users, Building2, GraduationCap, AlertTriangle, Bell, BarChart3, Calendar, UserCheck, Shield, ToggleLeft, ToggleRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { SmoothScrollContainer } from "@/components/ui/smooth-scroll-container";
+import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 
 interface DepartmentStats {
   id: string;
@@ -65,7 +67,7 @@ export const SuperAdminDashboard = ({
   const currentMonth = new Date().toLocaleString('default', { month: 'long' });
   
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <SmoothScrollContainer className="flex flex-col min-h-screen bg-slate-50">
       {/* Header with app name, organization logo and notifications */}
       <div className="bg-white shadow-sm px-4 py-3 mb-4">
         <div className="flex items-center justify-between">
@@ -322,6 +324,6 @@ export const SuperAdminDashboard = ({
           </div>
         )}
       </div>
-    </div>
+    </SmoothScrollContainer>
   );
 };

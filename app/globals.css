@@ -6,6 +6,49 @@
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* Smooth scrolling utilities */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+  }
+  
+  .smooth-scroll-auto {
+    scroll-behavior: auto;
+  }
+  
+  .smooth-scroll-instant {
+    scroll-behavior: auto;
+  }
+  
+  /* Custom scrollbar styles */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: rgb(243 244 246);
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgb(156 163 175);
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgb(107 114 128);
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 
@@ -88,6 +131,11 @@
   * {
     @apply border-border;
   }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
   body {
     @apply bg-background text-foreground;
   }

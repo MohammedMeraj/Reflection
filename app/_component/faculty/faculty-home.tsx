@@ -4,6 +4,8 @@ import { useState } from "react";
 import { ChevronRight, Users, BookOpen, Clock, AlertTriangle, Bell, BarChart3, Calendar, UserCheck } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { SmoothScrollContainer, ScrollSection } from "@/components/ui/smooth-scroll-container";
+import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 
 interface ClassStats {
   id: string;
@@ -40,12 +42,13 @@ export const AttendanceDashboard = ({
     ? Math.round(classes.reduce((sum, cls) => sum + cls.averageAttendance, 0) / classes.length)
     : 0;
   const totalDefaulters = classes.reduce((total, cls) => total + cls.defaulters, 0);
+  const { scrollTo } = useSmoothScroll();
   
   // Get the current month for attendance summary
   const currentMonth = new Date().toLocaleString('default', { month: 'long' });
   
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <SmoothScrollContainer className="flex flex-col min-h-screen bg-slate-50">
       {/* Header with app name, organization logo and notifications */}
       <div className="bg-white shadow-sm px-4 py-3 mb-4">
         <div className="flex items-center justify-between">
@@ -77,14 +80,44 @@ export const AttendanceDashboard = ({
         </div>
       </div>
 
+      {/* Quick Navigation */}
+      <div className="px-4 mb-4">
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          <button
+            onClick={() => scrollTo('stats', { duration: 500, smooth: true })}
+            className="flex-shrink-0 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium"
+          >
+            Stats
+          </button>
+          <button
+            onClick={() => scrollTo('summary', { duration: 500, smooth: true })}
+            className="flex-shrink-0 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium"
+          >
+            Summary
+          </button>
+          <button
+            onClick={() => scrollTo('insights', { duration: 500, smooth: true })}
+            className="flex-shrink-0 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium"
+          >
+            Insights
+          </button>
+          <button
+            onClick={() => scrollTo('defaulters', { duration: 500, smooth: true })}
+            className="flex-shrink-0 px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium"
+          >
+            Defaulters
+          </button>
+        </div>
+      </div>
+
       {/* Welcome message */}
-      <div className="px-4 mb-6">
+      <ScrollSection name="welcome" className="px-4 mb-6">
         <h2 className="text-xl font-medium text-gray-800">Welcome back, {facultyName}</h2>
         <p className="text-sm text-gray-500 mt-1">Here's your attendance overview</p>
-      </div>
+      </ScrollSection>
       
       {/* Stats Cards - 2x2 grid */}
-      <div className="grid grid-cols-2 gap-3 px-4 mb-6">
+      <ScrollSection name="stats" className="grid grid-cols-2 gap-3 px-4 mb-6">
         <div className="bg-white p-4 rounded-xl shadow-sm flex flex-col items-center justify-center">
           <div className="p-2 bg-blue-100 rounded-full mb-2">
             <Users size={20} className="text-blue-600" />
@@ -116,10 +149,10 @@ export const AttendanceDashboard = ({
           <span className="text-2xl font-bold">{totalDefaulters}</span>
           <span className="text-xs text-gray-500">Defaulters</span>
         </div>
-      </div>
+      </ScrollSection>
       
       {/* Attendance Summary Cards */}
-      <div className="px-4 mb-6">
+      <ScrollSection name="summary" className="px-4 mb-6">
         <h3 className="text-md font-medium text-gray-800 mb-3">Attendance Summary</h3>
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white p-4 rounded-xl shadow-sm flex items-center">
@@ -142,10 +175,10 @@ export const AttendanceDashboard = ({
             </div>
           </div>
         </div>
-      </div>
+      </ScrollSection>
       
       {/* Student Attendance Insights */}
-      <div className="px-4 mb-6">
+      <ScrollSection name="insights" className="px-4 mb-6">
         <h3 className="text-md font-medium text-gray-800 mb-3">Student Insights</h3>
         <div className="bg-white p-4 rounded-xl shadow-sm">
           <div className="flex items-center justify-between mb-4">
@@ -201,10 +234,10 @@ export const AttendanceDashboard = ({
             </div>
           </div>
         </div>
-      </div>
+      </ScrollSection>
       
       {/* Defaulters Summary */}
-      <div className="px-4 mb-6">
+      <ScrollSection name="defaulters" className="px-4 mb-6">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-md font-medium text-gray-800">Defaulters Summary</h3>
           <Link href="/faculty/defaulters" className="text-blue-600 text-sm font-medium">View All</Link>
@@ -249,10 +282,10 @@ export const AttendanceDashboard = ({
             Send Notification to All Defaulters
           </button>
         </div>
-      </div>
+      </ScrollSection>
       
       {/* Recent Attendance Sessions */}
-      <div className="px-4 mb-16">
+      <ScrollSection name="recent" className="px-4 mb-16">
         <h3 className="text-md font-medium text-gray-800 mb-3">Recent Sessions</h3>
         <div className="bg-white rounded-xl shadow-sm p-4">
           {/* Sample recent sessions */}
@@ -268,7 +301,7 @@ export const AttendanceDashboard = ({
             </div>
           ))}
         </div>
-      </div>
-    </div>
+      </ScrollSection>
+    </SmoothScrollContainer>
   );
 };
