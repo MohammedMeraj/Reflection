@@ -102,12 +102,14 @@ export const AttendanceSelection = ({
   
   if (isReviewing) {
     return (
-      <div className="flex flex-col h-full bg-slate-50 p-4">
-        {/* Header */}
-        <h2 className="text-lg font-medium mb-4">Confirm Details</h2>
+      <div className="flex flex-col h-full bg-slate-50">
+        {/* Sticky Header */}
+        <div className="sticky top-0 z-20 bg-white shadow-sm px-4 py-3 border-b">
+          <h2 className="text-lg font-medium">Confirm Details</h2>
+        </div>
         
-        {/* Review data */}
-        <div className="flex-1 mb-4">
+        {/* Scrollable Review content */}
+        <div className="flex-1 overflow-y-auto p-4 pb-24">
           <div className="bg-white rounded-xl p-4 shadow-sm">
             <div className="grid grid-cols-2 gap-y-3 text-sm">
               <div className="text-gray-500">Class Year:</div>
@@ -148,33 +150,37 @@ export const AttendanceSelection = ({
           </div>
         </div>
         
-        {/* Navigation buttons */}
-        <div className="flex justify-between">
-          <button
-            onClick={goBackFromReview}
-            className="px-4 py-2 rounded-full text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300"
-          >
-            Back
-          </button>
-          
-          <button
-            onClick={completeSelection}
-            className="px-4 py-2 rounded-full text-sm font-medium text-white bg-blue-500 hover:bg-blue-600"
-          >
-            Confirm<ChevronRight size={16} className="inline ml-1" />
-          </button>
+        {/* Fixed Navigation buttons - positioned above mobile menu */}
+        <div className="fixed bottom-16 left-0 right-0 z-10 p-4 bg-white border-t shadow-lg md:bottom-0">
+          <div className="flex justify-between max-w-md mx-auto gap-3">
+            <button
+              onClick={goBackFromReview}
+              className="px-6 py-3 rounded-xl text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 flex-1"
+            >
+              Back
+            </button>
+            
+            <button
+              onClick={completeSelection}
+              className="px-6 py-3 rounded-xl text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 flex-1"
+            >
+              Confirm<ChevronRight size={16} className="inline ml-1" />
+            </button>
+          </div>
         </div>
       </div>
     );
   }
   
   return (
-    <div className="flex flex-col h-full bg-slate-50 p-4">
-      {/* Header */}
-      <h2 className="text-lg font-medium mb-4">Attendance Selection</h2>
+    <div className="flex flex-col h-full bg-slate-50">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-20 bg-white shadow-sm px-4 py-3 border-b">
+        <h2 className="text-lg font-medium">Attendance Selection</h2>
+      </div>
       
-      {/* All selection options on one page */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Scrollable content with proper padding for fixed button */}
+      <div className="flex-1 overflow-y-auto p-4 pb-24">
         {/* Class Year selection */}
         <div className="mb-6">
           <h3 className="font-medium mb-3">Class Year*</h3>
@@ -307,18 +313,15 @@ export const AttendanceSelection = ({
         </div>
       </div>
       
-      {/* Confirm button */}
-      <div className="mt-4">
+      {/* Fixed Review & Confirm button - positioned above mobile menu */}
+      <div className="fixed bottom-16 left-0 right-0 z-10 p-4 bg-white border-t shadow-lg md:bottom-0">
         <button
           onClick={handleReview}
           disabled={!isFormComplete()}
-          className="w-full py-3 rounded-xl text-center text-white bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
+          className="w-full py-3 rounded-xl text-center text-white bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium max-w-md mx-auto block"
         >
           Review & Confirm
         </button>
-        <p className="text-xs text-gray-500 text-center mt-2">
-          * Required fields
-        </p>
       </div>
     </div>
   );
