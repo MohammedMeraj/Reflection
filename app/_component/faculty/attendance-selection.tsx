@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { ChevronRight, Check } from "lucide-react";
+import { AttendanceSkeleton } from "@/components/ui/skeleton";
 
 interface SelectionProps {
   onComplete: (selection: SelectionData) => void;
   facultyId?: string;
   facultyBranch?: string;
+  isLoading?: boolean;
 }
 
 export interface SelectionData {
@@ -25,7 +27,12 @@ export const AttendanceSelection = ({
   onComplete,
   facultyId = "FAC001",
   facultyBranch = "CSE",
+  isLoading = false,
 }: SelectionProps) => {
+  // Show skeleton loading
+  if (isLoading) {
+    return <AttendanceSkeleton />;
+  }
   // Form data
   const [classYear, setClassYear] = useState("");
   const [division, setDivision] = useState("");

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Home, Users, BookOpen, FlaskConical } from "lucide-react";
+import { Home, Users, BookOpen, FlaskConical, BookOpenCheck } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
@@ -30,6 +30,13 @@ export const MobileNavigation = () => {
       name: "Classes", 
       icon: BookOpen, 
       href: "/departmentHead/classes",
+      color: "text-blue-600",
+      activeColor: "text-blue-700 bg-blue-50"
+    },
+    { 
+      name: "Subjects", 
+      icon: BookOpenCheck, 
+      href: "/departmentHead/subjects",
       color: "text-blue-600",
       activeColor: "text-blue-700 bg-blue-50"
     },

@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { SmoothScrollContainer, ScrollSection } from "@/components/ui/smooth-scroll-container";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
+import { ProfileSkeleton } from "@/components/ui/skeleton";
 
 interface ClassStats {
   id: string;
@@ -25,6 +26,7 @@ interface AttendanceDashboardProps {
   organizationType: string;
   logoSrc: string;
   notifications?: number;
+  isLoading?: boolean;
 }
 
 export const AttendanceDashboard = ({
@@ -34,7 +36,12 @@ export const AttendanceDashboard = ({
   organizationType,
   logoSrc,
   notifications = 0,
+  isLoading = false,
 }: AttendanceDashboardProps) => {
+  // Show skeleton loading
+  if (isLoading) {
+    return <ProfileSkeleton />;
+  }
   // Calculate aggregated stats
   const totalClasses = classes.length;
   const totalLectures = classes.reduce((total, cls) => total + cls.lecturesDelivered, 0);

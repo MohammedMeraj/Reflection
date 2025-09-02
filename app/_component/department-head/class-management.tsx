@@ -5,6 +5,7 @@ import { Plus, BookOpen, Calendar, Users, Edit3, Trash2, Search, Check, Lock } f
 import { Button } from "@/components/ui/button";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { ClassManagementSkeleton } from "@/components/ui/skeleton";
 
 interface Division {
   id: string;
@@ -48,6 +49,11 @@ export const ClassManagement = ({
   });
   const [newDivisionName, setNewDivisionName] = useState("");
   const [previewClassId, setPreviewClassId] = useState("");
+
+  // Show skeleton loading if data is not available
+  if (!classList) {
+    return <ClassManagementSkeleton />;
+  }
 
   // Generate class ID for preview
   const generateClassId = (name: string, year: string) => {

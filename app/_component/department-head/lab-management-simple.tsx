@@ -7,6 +7,7 @@ import { SmoothScrollContainer } from "@/components/ui/smooth-scroll-container";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { LabManagementSkeleton } from "@/components/ui/skeleton";
 
 interface Lab {
   _id: string;
@@ -58,6 +59,12 @@ export const LabManagement = () => {
   // Convex queries
   const classList = useQuery(api.classes.getAllClasses) || [];
   const allLabs = useQuery(api.labs.getAllLabs, {}) || [];
+
+  // Show skeleton loading
+  const isLoading = classList === undefined || allLabs === undefined;
+  if (isLoading) {
+    return <LabManagementSkeleton />;
+  }
 
   // Convex mutations
   const createLabMutation = useMutation(api.labs.createLab);

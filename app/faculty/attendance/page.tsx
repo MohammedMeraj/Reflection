@@ -43,6 +43,16 @@ export default function AttendancePage() {
   const [loading, setLoading] = useState(true);
   const [selectionComplete, setSelectionComplete] = useState(false);
   const [selectionData, setSelectionData] = useState<SelectionData | null>(null);
+  const [selectionLoading, setSelectionLoading] = useState(true);
+  
+  // Simulate initial loading for selection component
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSelectionLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
   
   // Simulate fetching students from API
   useEffect(() => {
@@ -110,7 +120,10 @@ export default function AttendancePage() {
   if (!selectionComplete) {
     return (
       <div className="flex flex-col h-screen">
-        <AttendanceSelection onComplete={handleSelectionComplete} />
+        <AttendanceSelection 
+          onComplete={handleSelectionComplete} 
+          isLoading={selectionLoading}
+        />
       </div>
     );
   }

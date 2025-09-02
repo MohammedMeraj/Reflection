@@ -1,5 +1,6 @@
 "use client"
 import { UserManagement } from "@/app/_component/super-admin/user-management";
+import { useState, useEffect } from "react";
 
 // Mock users data
 const mockUsers = [
@@ -89,6 +90,17 @@ const mockUsers = [
 ];
 
 export default function UsersPage() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading time
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleAddUser = () => {
     console.log("Add new user");
     // Navigate to add user form
@@ -116,6 +128,7 @@ export default function UsersPage() {
       onEditUser={handleEditUser}
       onDeleteUser={handleDeleteUser}
       onToggleStatus={handleToggleStatus}
+      isLoading={isLoading}
     />
   );
 }

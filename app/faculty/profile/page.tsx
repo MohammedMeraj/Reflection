@@ -202,7 +202,7 @@ export default function FacultyProfilePage() {
 
   return (
     <div className="flex flex-col h-screen">
-      {facultyInfo && <FacultyProfile facultyInfo={facultyInfo} />}
+      {facultyInfo && <FacultyProfile facultyInfo={facultyInfo} isLoading={loading} />}
     </div>
   );
 }

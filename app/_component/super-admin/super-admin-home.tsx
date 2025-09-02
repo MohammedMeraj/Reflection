@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { SmoothScrollContainer } from "@/components/ui/smooth-scroll-container";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
+import { SuperAdminSkeleton } from "@/components/ui/skeleton";
 
 interface DepartmentStats {
   id: string;
@@ -37,6 +38,7 @@ interface SuperAdminDashboardProps {
   realTimeStats?: any;
   realTimeDepartmentHeads?: DepartmentHead[];
   realTimeDepartments?: any[];
+  isLoading?: boolean;
 }
 
 export const SuperAdminDashboard = ({
@@ -49,19 +51,26 @@ export const SuperAdminDashboard = ({
   realTimeStats,
   realTimeDepartmentHeads,
   realTimeDepartments,
+  isLoading = false,
 }: SuperAdminDashboardProps) => {
+  // Show skeleton loading
+  if (isLoading) {
+    return <SuperAdminSkeleton />;
+  }
   // Use real-time data if available, otherwise use empty array
   const displayedDepartmentHeads = realTimeDepartmentHeads || [];
-  // Calculate aggregated stats
-  const totalDepartments = departments.length;
-  const totalFaculty = departments.reduce((total, dept) => total + dept.totalFaculty, 0);
-  const totalStudents = departments.reduce((total, dept) => total + dept.totalStudents, 0);
-  const totalDefaulters = departments.reduce((total, dept) => total + dept.defaulters, 0);
+  
+  // Use real stats from Convex if available, otherwise calculate from departments
+  const totalDepartments = realTimeStats?.totalDepartments || departments.length;
+  const totalFaculty = realTimeStats?.totalFaculty || departments.reduce((total, dept) => total + dept.totalFaculty, 0);
+  const totalStudents = realTimeStats?.totalStudents || departments.reduce((total, dept) => total + dept.totalStudents, 0);
+  const totalDefaulters = realTimeStats?.totalDefaulters || departments.reduce((total, dept) => total + dept.defaulters, 0);
   const lowAttendanceClasses = departments.reduce((total, dept) => total + dept.lowAttendanceClasses, 0);
   
-  const overallAttendance = departments.length > 0
-    ? Math.round(departments.reduce((sum, dept) => sum + dept.averageAttendance, 0) / departments.length)
-    : 0;
+  const overallAttendance = realTimeStats?.overallAttendanceRate || 
+    (departments.length > 0
+      ? Math.round(departments.reduce((sum, dept) => sum + dept.averageAttendance, 0) / departments.length)
+      : 0);
   
   // Get the current month for attendance summary
   const currentMonth = new Date().toLocaleString('default', { month: 'long' });

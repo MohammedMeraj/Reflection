@@ -5,6 +5,7 @@ import { Users, BookOpen, FlaskConical, Building2, Edit3, AlertTriangle } from "
 import { Button } from "@/components/ui/button";
 import { SmoothScrollContainer } from "@/components/ui/smooth-scroll-container";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
+import { DepartmentHeadHomeSkeleton } from "@/components/ui/skeleton";
 
 interface Faculty {
   id: string;
@@ -39,17 +40,24 @@ interface DepartmentHeadDashboardProps {
   facultyList: Faculty[];
   classList: Class[];
   departmentName: string;
+  isLoading?: boolean;
 }
 
 export const DepartmentHeadDashboard = ({ 
   facultyList, 
   classList, 
-  departmentName 
+  departmentName,
+  isLoading = false
 }: DepartmentHeadDashboardProps) => {
   const [activeSection, setActiveSection] = useState<'overview' | 'faculty' | 'classes' | 'labs'>('overview');
   const [isEditingDepartment, setIsEditingDepartment] = useState(false);
   const [departmentNameInput, setDepartmentNameInput] = useState(departmentName);
   const [confirmationStep, setConfirmationStep] = useState(0);
+
+  // Show skeleton loading
+  if (isLoading) {
+    return <DepartmentHeadHomeSkeleton />;
+  }
 
   // Calculate stats
   const totalFaculty = facultyList.length;

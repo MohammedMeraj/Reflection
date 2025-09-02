@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { LogOut} from "lucide-react";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
+import { ProfileSkeleton } from "@/components/ui/skeleton";
 interface SubjectTaught {
   id: string;
   name: string;
@@ -42,12 +43,19 @@ interface FacultyProfileInfo {
 
 interface FacultyProfileProps {
   facultyInfo: FacultyProfileInfo;
+  isLoading?: boolean;
 }
 
 export const FacultyProfile = ({
   facultyInfo,
+  isLoading = false,
 }: FacultyProfileProps) => {
   const [activeTab, setActiveTab] = useState<"overview" | "subjects" | "publications">("overview");
+
+  // Show skeleton loading
+  if (isLoading) {
+    return <ProfileSkeleton />;
+  }
 
   // Format experience years
   const calculateExperience = (joinedYear: number) => {

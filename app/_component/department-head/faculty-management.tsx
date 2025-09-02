@@ -5,6 +5,7 @@ import { Plus, User, Mail, BookOpen, Edit3, Trash2, Search, Check, Lock, Crown, 
 import { Button } from "@/components/ui/button";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { FacultyManagementSkeleton } from "@/components/ui/skeleton";
 
 interface Faculty {
   id: string;
@@ -63,6 +64,11 @@ export const FacultyManagement = ({
   const [previewFacultyId, setPreviewFacultyId] = useState("");
   const [isUniqueId, setIsUniqueId] = useState(false);
   const [assigningCoordinatorFor, setAssigningCoordinatorFor] = useState<string | null>(null);
+
+  // Show skeleton loading if data is not available
+  if (!facultyList || !classList) {
+    return <FacultyManagementSkeleton />;
+  }
 
   // Query to check ID uniqueness
   const uniquenessCheck = useQuery(

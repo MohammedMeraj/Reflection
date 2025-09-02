@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function HomePage() {
   const [isMobile, setIsMobile] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Check if device width is less than 600px
   useEffect(() => {
@@ -22,6 +24,39 @@ export default function HomePage() {
     // Clean up
     return () => window.removeEventListener("resize", checkWidth);
   }, []);
+
+  // Simulate loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+        <div className="w-full max-w-md px-4 py-8 bg-white rounded-lg shadow-md text-center space-y-6">
+          <div>
+            <Skeleton className="h-8 w-32 mx-auto mb-2" />
+            <Skeleton className="h-4 w-48 mx-auto" />
+          </div>
+          
+          <div className="bg-gray-50 p-4 rounded-md">
+            <Skeleton className="h-5 w-40 mx-auto mb-2" />
+            <Skeleton className="h-3 w-32 mx-auto" />
+          </div>
+          
+          <div className="space-y-3">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-50">

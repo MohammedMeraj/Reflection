@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Users, UserCheck, UserPlus, Shield, Settings, Search, Filter, Edit, Trash2, Mail, Phone } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface User {
   id: string;
@@ -23,6 +24,7 @@ interface UserManagementProps {
   onEditUser?: (id: string) => void;
   onDeleteUser?: (id: string) => void;
   onToggleStatus?: (id: string) => void;
+  isLoading?: boolean;
 }
 
 export const UserManagement = ({
@@ -31,10 +33,71 @@ export const UserManagement = ({
   onEditUser,
   onDeleteUser,
   onToggleStatus,
+  isLoading = false,
 }: UserManagementProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState<'All' | 'Super Admin' | 'Admin' | 'Faculty' | 'Student'>('All');
   const [filterStatus, setFilterStatus] = useState<'All' | 'Active' | 'Inactive' | 'Pending'>('All');
+
+  // User Management Skeleton
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm px-4 py-3 border-b">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-9 w-24" />
+          </div>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="p-4 bg-white border-b space-y-3">
+          <Skeleton className="h-10 w-full" />
+          <div className="flex gap-2">
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-8 w-20" />
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-white p-4 rounded-lg shadow-sm">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-8 w-8" />
+                <div>
+                  <Skeleton className="h-6 w-8 mb-1" />
+                  <Skeleton className="h-3 w-12" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* User List */}
+        <div className="flex-1 p-4 space-y-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-white p-4 rounded-lg shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div>
+                    <Skeleton className="h-4 w-24 mb-1" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-6 w-16" />
+                  <Skeleton className="h-8 w-8" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -1,5 +1,6 @@
 "use client"
 import { AttendanceDashboard } from "@/app/_component/faculty/faculty-home";
+import { useState, useEffect } from "react";
 
 // Mock data for the dashboard
 const mockClasses = [
@@ -36,6 +37,17 @@ const mockClasses = [
 ];
 
 export default function Home() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading time
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <main className="min-h-screen bg-slate-50">
       <AttendanceDashboard 
@@ -45,6 +57,7 @@ export default function Home() {
         organizationType="Education"
         logoSrc="/api/placeholder/100/100" // Placeholder image
         notifications={3} // Show notification indicator
+        isLoading={isLoading}
       />
     </main>
   );
