@@ -121,11 +121,15 @@ export default function FacultyPage() {
     try {
       setIsLoading(true);
       
+      console.log("🔄 Assigning coordinator:", { facultyId, target });
+      
       // Find the faculty by facultyId
       const faculty = facultyList.find((f: any) => f.facultyId === facultyId);
       if (!faculty) {
         throw new Error("Faculty not found");
       }
+
+      console.log("👤 Found faculty:", faculty);
 
       let coordinatorTarget;
       if (target.type === "class" && target.classId) {
@@ -135,6 +139,7 @@ export default function FacultyPage() {
           type: "class" as const,
           classId: classItem._id
         };
+        console.log("🎓 Class target:", coordinatorTarget);
       } else if (target.type === "division" && target.divisionId) {
         // Find division by divisionId across all classes
         let division = null;
@@ -145,11 +150,17 @@ export default function FacultyPage() {
         if (!division) throw new Error("Division not found");
         coordinatorTarget = {
           type: "division" as const,
-          divisionId: division.id
+          divisionId: division._id
         };
+        console.log("📚 Division target:", coordinatorTarget);
       } else {
         throw new Error("Invalid coordinator target");
       }
+
+      console.log("📤 Sending to Convex:", {
+        facultyId: faculty._id,
+        target: coordinatorTarget,
+      });
 
       await assignCoordinatorMutation({
         facultyId: faculty._id,

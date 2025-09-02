@@ -161,22 +161,34 @@ export const assignClassCoordinator = mutation({
     )
   },
   handler: async (ctx, args) => {
+    console.log("🔄 assignClassCoordinator called with:", JSON.stringify(args, null, 2));
+    
     const faculty = await ctx.db.get(args.facultyId);
     if (!faculty) {
       throw new Error("Faculty not found");
     }
 
+    console.log("👤 Found faculty:", faculty.name);
+
     // Check if target already has a coordinator
     if (args.target.type === "class") {
       const existingClass = await ctx.db.get(args.target.classId);
+      if (!existingClass) {
+        throw new Error("Class not found");
+      }
       if (existingClass?.classCoordinatorId) {
         throw new Error("This class already has a coordinator");
       }
+      console.log("🎓 Assigning to class:", existingClass.name);
     } else {
       const existingDivision = await ctx.db.get(args.target.divisionId);
+      if (!existingDivision) {
+        throw new Error("Division not found");
+      }
       if (existingDivision?.classCoordinatorId) {
         throw new Error("This division already has a coordinator");
       }
+      console.log("📚 Assigning to division:", existingDivision.name);
     }
 
     // Update faculty as coordinator
