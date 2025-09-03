@@ -127,8 +127,8 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="pt-20 p-4 max-w-md mx-auto space-y-6">
+      {/* Main Content with proper padding for fixed header and bottom navigation */}
+      <div className="pt-20 pb-20 p-4 max-w-md mx-auto space-y-6">
         {/* Profile Picture Section */}
         <div className="bg-white rounded-lg p-6 shadow-sm">
           <div className="flex flex-col items-center">

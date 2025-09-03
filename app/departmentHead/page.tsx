@@ -4,7 +4,6 @@ import { useState } from "react";
 import { DepartmentHeadDashboard } from "@/app/_component/department-head/department-head-home";
 
 // Mock data for the department head dashboard
-const mockDepartmentName = "Computer Science & Engineering";
 
 const mockFacultyList = [
   {
@@ -94,13 +93,11 @@ const mockClassList = [
 export default function DepartmentHeadPage() {
   const [facultyList, setFacultyList] = useState(mockFacultyList);
   const [classList, setClassList] = useState(mockClassList);
-  const [departmentName, setDepartmentName] = useState(mockDepartmentName);
 
   return (
     <DepartmentHeadDashboard 
       facultyList={facultyList}
       classList={classList}
-      departmentName={departmentName}
     />
   );
 }
