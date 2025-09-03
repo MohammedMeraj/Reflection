@@ -5,9 +5,17 @@ import { FacultyManagement } from "@/app/_component/department-head/faculty-mana
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
 
 export default function FacultyPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useKindeAuth();
+
+  // Get current department head information based on logged-in user email
+  const currentDepartmentHead = useQuery(
+    api.superAdmin.getDepartmentHeadByEmail,
+    user?.email ? { email: user.email } : "skip"
+  );
 
   // Convex queries
   const facultyList = useQuery(api.faculty.getAllFaculty, {}) || [];
@@ -37,14 +45,29 @@ export default function FacultyPage() {
         })
         .filter(Boolean) as Id<"classes">[];
 
+      // Get department ID from currently logged in department head
+      let currentDepartmentId: Id<"departments"> | undefined;
+      
+      if (currentDepartmentHead?.departmentId) {
+        // Use the department ID from the logged-in department head
+        currentDepartmentId = currentDepartmentHead.departmentId;
+        console.log("✅ Using department ID from logged-in department head:", currentDepartmentId);
+      } else {
+        // No department head found, pass undefined
+        currentDepartmentId = undefined;
+        console.log("⚠️ Department head not found for email:", user?.email || "no email");
+        console.log("⚠️ Faculty will be created without department assignment");
+      }
+
       await addFacultyMutation({
         name: faculty.name,
         email: faculty.email,
         assignedClasses: assignedClassIds,
+        departmentId: currentDepartmentId,
         qualification: faculty.qualification,
       });
 
-      console.log("✅ Faculty added successfully");
+      console.log("✅ Faculty added successfully with department ID:", currentDepartmentId);
     } catch (error) {
       console.error("❌ Error adding faculty:", error);
       alert(`Error adding faculty: ${error}`);
@@ -201,6 +224,7 @@ export default function FacultyPage() {
     id: faculty.facultyId,
     name: faculty.name,
     email: faculty.email,
+    departmentId: faculty.departmentId,
     assignedClasses: faculty.assignedClassesInfo?.map((cls: any) => cls.classId) || [],
     coordinatorInfo: faculty.coordinatorInfo,
     isClassCoordinator: faculty.isClassCoordinator,

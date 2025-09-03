@@ -343,6 +343,24 @@ export const getDepartmentHeadsByDepartment = query({
   },
 });
 
+export const getDepartmentHeadByEmail = query({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    const departmentHead = await ctx.db
+      .query("departmentHeads")
+      .filter((q) => q.eq(q.field("email"), args.email))
+      .first();
+    
+    if (!departmentHead) return null;
+
+    const department = await ctx.db.get(departmentHead.departmentId);
+    return {
+      ...departmentHead,
+      department: department || null,
+    };
+  },
+});
+
 export const getActiveDepartmentHeads = query({
   handler: async (ctx) => {
     const departmentHeads = await ctx.db

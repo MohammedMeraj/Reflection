@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Users, BookOpen, FlaskConical, Building2, Edit3, AlertTriangle } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Users, BookOpen, FlaskConical, Building2, Edit3, AlertTriangle, User, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SmoothScrollContainer } from "@/components/ui/smooth-scroll-container";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 import { DepartmentHeadHomeSkeleton } from "@/components/ui/skeleton";
+import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
 
 interface Faculty {
   id: string;
@@ -53,6 +54,27 @@ export const DepartmentHeadDashboard = ({
   const [isEditingDepartment, setIsEditingDepartment] = useState(false);
   const [departmentNameInput, setDepartmentNameInput] = useState(departmentName);
   const [confirmationStep, setConfirmationStep] = useState(0);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const { user } = useKindeAuth();
+
+  // Debug logging
+  console.log('Kinde user object:', user);
+  console.log('User email:', user?.email);
+
+  // Handle click outside to close profile menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Show skeleton loading
   if (isLoading) {
@@ -91,8 +113,52 @@ export const DepartmentHeadDashboard = ({
   ];
 
   return (
-    <SmoothScrollContainer className="p-4 max-w-md mx-auto space-y-6 min-h-screen">
-      {/* Header with Department Name */}
+    <div className="min-h-screen">
+      {/* Department Admin Header - Fixed at top */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div className="flex items-center justify-between p-4 max-w-md mx-auto">
+          <h1 className="text-xl font-bold text-gray-800">Department Admin</h1>
+          
+          {/* Profile Icon with Dropdown */}
+          <div className="relative" ref={profileMenuRef}>
+            <button
+              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+              className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <User className="w-5 h-5 text-gray-600" />
+              <ChevronDown className={`w-4 h-4 text-gray-600 transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {/* Profile Dropdown Menu */}
+            {isProfileMenuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-10">
+                <div className="px-4 py-2 border-b border-gray-100">
+                  <p className="text-sm font-medium text-gray-700">Logged in as:</p>
+                  <p className="text-sm text-gray-600 break-all">
+                    {user?.email || 'Loading user info...'}
+                  </p>
+                </div>
+                <div className="py-1">
+                  <button
+                    onClick={() => {
+                      setIsProfileMenuOpen(false);
+                      // Navigate to profile page - we'll implement this
+                      window.location.href = '/departmentHead/profile';
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                  >
+                    View Profile
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content with top padding for fixed header */}
+      <SmoothScrollContainer className="pt-20 p-4 max-w-md mx-auto space-y-6">
+        {/* Header with Department Name */}
       <div className="bg-white rounded-lg p-4 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           {isEditingDepartment ? (
@@ -250,5 +316,6 @@ export const DepartmentHeadDashboard = ({
         </div>
       </div>
     </SmoothScrollContainer>
+    </div>
   );
 };

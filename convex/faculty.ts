@@ -37,7 +37,7 @@ export const createFaculty = mutation({
     name: v.string(),
     email: v.string(),
     assignedClasses: v.array(v.id("classes")),
-    departmentId: v.optional(v.id("departments")),
+    departmentId: v.optional(v.id("departments")), // Made optional again
     qualification: v.optional(v.string())
   },
   handler: async (ctx, args) => {
@@ -263,6 +263,73 @@ export const getAllFaculty = query({
     if (args.departmentId) {
       faculty = faculty.filter(f => f.departmentId === args.departmentId);
     }
+
+    // Get coordinator information
+    const facultyWithInfo = await Promise.all(
+      faculty.map(async (fac) => {
+        let coordinatorInfo = null;
+        
+        if (fac.isClassCoordinator && fac.coordinatorFor) {
+          if (fac.coordinatorFor.type === "class") {
+            const classInfo = await ctx.db.get(fac.coordinatorFor.classId);
+            coordinatorInfo = {
+              type: "class" as const,
+              name: classInfo?.name,
+              year: classInfo?.year,
+              classId: classInfo?.classId
+            };
+          } else {
+            const divisionInfo = await ctx.db.get(fac.coordinatorFor.divisionId);
+            if (divisionInfo) {
+              const classInfo = await ctx.db.get(divisionInfo.classId);
+              coordinatorInfo = {
+                type: "division" as const,
+                name: `${classInfo?.name} - Division ${divisionInfo.name}`,
+                year: classInfo?.year,
+                divisionId: divisionInfo.divisionId
+              };
+            }
+          }
+        }
+
+        // Get assigned classes info
+        const assignedClassesInfo = await Promise.all(
+          fac.assignedClasses.map(async (classId: any) => {
+            const classInfo = await ctx.db.get(classId);
+            return classInfo ? {
+              id: classInfo._id,
+              name: classInfo.name,
+              year: classInfo.year,
+              classId: classInfo.classId
+            } : null;
+          })
+        );
+
+        return {
+          ...fac,
+          coordinatorInfo,
+          assignedClassesInfo: assignedClassesInfo.filter(Boolean)
+        };
+      })
+    );
+
+    return facultyWithInfo;
+  },
+});
+
+// Get faculty by department ID
+export const getFacultyByDepartmentId = query({
+  args: { departmentId: v.id("departments") },
+  handler: async (ctx, args) => {
+    const faculty = await ctx.db
+      .query("departmentFaculty")
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("isActive"), true),
+          q.eq(q.field("departmentId"), args.departmentId)
+        )
+      )
+      .collect();
 
     // Get coordinator information
     const facultyWithInfo = await Promise.all(

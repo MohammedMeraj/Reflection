@@ -11,6 +11,7 @@ interface Faculty {
   id: string;
   name: string;
   email: string;
+  departmentId?: string;
   assignedClasses: string[];
   coordinatorInfo?: {
     type: 'class' | 'division';
@@ -378,6 +379,19 @@ export const FacultyManagement = ({
                       {faculty.id}
                     </p>
                   </div>
+
+                  {/* Display Department ID */}
+                  {faculty.departmentId && (
+                    <div className="mt-2 p-2 bg-blue-50 rounded-md border border-blue-200">
+                      <div className="flex items-center gap-2 text-xs text-blue-600 mb-1">
+                        <BookOpen className="w-3 h-3" />
+                        <span>Department ID</span>
+                      </div>
+                      <p className="font-mono text-sm font-bold text-blue-800">
+                        {faculty.departmentId}
+                      </p>
+                    </div>
+                  )}
 
                   {/* Class Coordinator Info */}
                   {faculty.coordinatorInfo && (
