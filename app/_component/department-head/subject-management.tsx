@@ -8,6 +8,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { SmoothScrollContainer } from "@/components/ui/smooth-scroll-container";
 import { SubjectManagementSkeleton } from "@/components/ui/skeleton";
+import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
 
 interface Subject {
   _id: string;
@@ -21,6 +22,19 @@ interface Subject {
 }
 
 export const SubjectManagement = () => {
+  const { user } = useKindeAuth();
+
+  // Get current department head information based on logged-in user email
+  const currentDepartmentHead = useQuery(
+    api.superAdmin.getDepartmentHeadByEmail,
+    user?.email ? { email: user.email } : "skip"
+  );
+
+  // Get department information to get the department name
+  const departmentInfo = useQuery(
+    api.superAdmin.getDepartmentById,
+    currentDepartmentHead?.departmentId ? { id: currentDepartmentHead.departmentId } : "skip"
+  );
   const [isAddingSubject, setIsAddingSubject] = useState(false);
   const [editingSubjectId, setEditingSubjectId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,7 +55,10 @@ export const SubjectManagement = () => {
   const [subjectToDelete, setSubjectToDelete] = useState<{id: string, name: string} | null>(null);
 
   // Convex queries and mutations
-  const subjects = useQuery(api.subjects.getAllSubjects, {});
+  const subjects = useQuery(
+    api.subjects.getSubjectsByDepartment,
+    currentDepartmentHead?.departmentId ? { departmentId: currentDepartmentHead.departmentId } : "skip"
+  );
   const createSubjectMutation = useMutation(api.subjects.createSubject);
   const updateSubjectMutation = useMutation(api.subjects.updateSubject);
   const deleteSubjectMutation = useMutation(api.subjects.deleteSubject);
@@ -61,19 +78,20 @@ export const SubjectManagement = () => {
   }, [newSubject.name, newSubject.code]);
 
   // Show skeleton loading
-  const isLoading = subjects === undefined;
+  const isLoading = subjects === undefined || currentDepartmentHead === undefined;
   if (isLoading) {
     return <SubjectManagementSkeleton />;
   }
 
   const handleAddSubject = async () => {
-    if (newSubject.name && newSubject.code) {
+    if (newSubject.name && newSubject.code && currentDepartmentHead?.departmentId) {
       try {
         await createSubjectMutation({
           name: newSubject.name,
           code: newSubject.code,
           credits: newSubject.credits,
-          department: "Computer Science & Engineering", // Auto-selected from department head
+          department: departmentInfo?.name || "Unknown Department", // Fallback for department name
+          departmentId: currentDepartmentHead.departmentId, // Primary key for department linking
         });
         
         setNewSubject({ name: "", code: "", credits: 1 });

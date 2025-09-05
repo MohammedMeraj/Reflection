@@ -8,6 +8,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { LabManagementSkeleton } from "@/components/ui/skeleton";
+import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
 
 interface Lab {
   _id: string;
@@ -37,6 +38,19 @@ interface Class {
 }
 
 export const LabManagement = () => {
+  const { user } = useKindeAuth();
+
+  // Get current department head information based on logged-in user email
+  const currentDepartmentHead = useQuery(
+    api.superAdmin.getDepartmentHeadByEmail,
+    user?.email ? { email: user.email } : "skip"
+  );
+
+  // Get department information to get the department name
+  const departmentInfo = useQuery(
+    api.superAdmin.getDepartmentById,
+    currentDepartmentHead?.departmentId ? { id: currentDepartmentHead.departmentId } : "skip"
+  );
   const [isAddingLab, setIsAddingLab] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [selectedDivisionId, setSelectedDivisionId] = useState("");
@@ -57,11 +71,16 @@ export const LabManagement = () => {
   const [labToDelete, setLabToDelete] = useState<{id: string, name: string} | null>(null);
 
   // Convex queries
-  const classList = useQuery(api.classes.getAllClasses);
-  const allLabs = useQuery(api.labs.getAllLabs, {});
+  const classList = useQuery(
+    api.classes.getAllClasses
+  );
+  const allLabs = useQuery(
+    api.labsSimple.getLabsByDepartment,
+    currentDepartmentHead ? { departmentId: currentDepartmentHead.departmentId } : "skip"
+  );
 
   // Convex mutations
-  const createLabMutation = useMutation(api.labs.createLab);
+  const createLabMutation = useMutation(api.labsSimple.createLab);
   const updateLabMutation = useMutation(api.labs.updateLab);
   const deleteLabMutation = useMutation(api.labs.deleteLab);
 
@@ -97,7 +116,7 @@ export const LabManagement = () => {
   }, [classList, allLabs, selectedClassId, selectedDivisionId]);
 
   // Show skeleton loading
-  const isLoading = classList === undefined || allLabs === undefined;
+  const isLoading = classList === undefined || allLabs === undefined || currentDepartmentHead === undefined;
   if (isLoading) {
     return <LabManagementSkeleton />;
   }
@@ -183,6 +202,7 @@ export const LabManagement = () => {
         year: currentYear,
         isActive: true,
         createdAt: Date.now(),
+        departmentId: currentDepartmentHead.departmentId,  // Bind to department
       });
 
       // Reset form

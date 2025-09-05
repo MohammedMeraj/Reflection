@@ -14,6 +14,7 @@ export const createLab = mutation({
     year: v.number(),
     isActive: v.boolean(),
     createdAt: v.number(),
+    departmentId: v.id("departments"),  // Bind to department
   },
   handler: async (ctx, args) => {
     // Check for overlapping roll numbers in the same context (class or division)
@@ -75,6 +76,45 @@ export const getAllLabs = query({
   args: {},
   handler: async (ctx) => {
     const labs = await ctx.db.query("labs").collect();
+    
+    // Enhance each lab with class and division names
+    const enhancedLabs = await Promise.all(
+      labs.map(async (lab) => {
+        let className = lab.className || "";
+        let divisionName = lab.divisionName || "";
+
+        // If we don't have cached names, fetch them
+        if (!className && lab.classId) {
+          const classDoc = await ctx.db.get(lab.classId);
+          className = classDoc?.name || "";
+        }
+
+        if (!divisionName && lab.divisionId) {
+          const divisionDoc = await ctx.db.get(lab.divisionId);
+          divisionName = divisionDoc?.name || "";
+        }
+
+        return {
+          ...lab,
+          className,
+          divisionName,
+        };
+      })
+    );
+
+    // Sort by creation date (newest first)
+    return enhancedLabs.sort((a, b) => b.createdAt - a.createdAt);
+  },
+});
+
+// Get labs by department ID
+export const getLabsByDepartment = query({
+  args: { departmentId: v.id("departments") },
+  handler: async (ctx, args) => {
+    const labs = await ctx.db
+      .query("labs")
+      .filter(q => q.eq(q.field("departmentId"), args.departmentId))
+      .collect();
     
     // Enhance each lab with class and division names
     const enhancedLabs = await Promise.all(

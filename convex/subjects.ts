@@ -12,13 +12,29 @@ export const getAllSubjects = query({
 
 // Get subjects by department
 export const getSubjectsByDepartment = query({
-  args: { department: v.string() },
+  args: { 
+    department: v.optional(v.string()),
+    departmentId: v.optional(v.id("departments"))
+  },
   handler: async (ctx, args) => {
-    const subjects = await ctx.db
-      .query("subjects")
-      .filter((q) => q.eq(q.field("department"), args.department))
-      .collect();
-    return subjects;
+    let query = ctx.db.query("subjects");
+    
+    if (args.department) {
+      const subjects = await query
+        .filter((q) => q.eq(q.field("department"), args.department))
+        .collect();
+      return subjects;
+    }
+    
+    if (args.departmentId) {
+      const subjects = await query
+        .filter((q) => q.eq(q.field("departmentId"), args.departmentId))
+        .collect();
+      return subjects;
+    }
+    
+    // If neither parameter provided, return all subjects
+    return await query.collect();
   },
 });
 
@@ -38,6 +54,7 @@ export const createSubject = mutation({
     code: v.string(),
     credits: v.number(),
     department: v.string(),
+    departmentId: v.optional(v.id("departments")),
   },
   handler: async (ctx, args) => {
     // Generate subject ID
@@ -66,6 +83,7 @@ export const createSubject = mutation({
       code: args.code,
       credits: args.credits,
       department: args.department,
+      departmentId: args.departmentId, // Store department ID for proper linking
       isActive: true,
       createdAt: Date.now(),
     });
