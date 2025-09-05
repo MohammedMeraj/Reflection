@@ -102,7 +102,7 @@ export const AttendanceSelection = ({
   
   if (isReviewing) {
     return (
-      <div className="flex flex-col h-full bg-slate-50">
+      <div className="min-h-screen flex flex-col bg-slate-50">
         {/* Sticky Header */}
         <div className="sticky top-0 z-20 bg-white shadow-sm px-4 py-3 border-b">
           <h2 className="text-lg font-medium">Confirm Details</h2>
@@ -173,7 +173,7 @@ export const AttendanceSelection = ({
   }
   
   return (
-    <div className="flex flex-col h-full bg-slate-50">
+    <div className="min-h-screen flex flex-col bg-slate-50">
       {/* Sticky Header */}
       <div className="sticky top-0 z-20 bg-white shadow-sm px-4 py-3 border-b">
         <h2 className="text-lg font-medium">Attendance Selection</h2>

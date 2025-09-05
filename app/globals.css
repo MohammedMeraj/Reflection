@@ -49,6 +49,11 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  
+  /* Optimized touch handling for buttons */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
 }
 
 

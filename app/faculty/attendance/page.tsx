@@ -119,39 +119,33 @@ export default function AttendancePage() {
 
   if (!selectionComplete) {
     return (
-      <div className="flex flex-col h-screen">
-        <AttendanceSelection 
-          onComplete={handleSelectionComplete} 
-          isLoading={selectionLoading}
-        />
-      </div>
+      <AttendanceSelection 
+        onComplete={handleSelectionComplete} 
+        isLoading={selectionLoading}
+      />
     );
   }
   
   if (loading) {
     return (
-      <div className="flex flex-col h-screen">
-        <SkeletonLoading message={`Loading ${selectionData?.sessionType === "Lab" ? `Batch ${selectionData.batch}` : "Class"} Students`} />
-      </div>
+      <SkeletonLoading message={`Loading ${selectionData?.sessionType === "Lab" ? `Batch ${selectionData.batch}` : "Class"} Students`} />
     );
   }
 
   return (
-    <div className="flex flex-col h-screen">
-      <AttendanceTaker
-        students={students}
-        onSave={handleSaveAttendance}
-        onBack={handleBackToSelection}
-        classYear={selectionData?.classYear || ""}
-        division={selectionData?.division}
-        sessionType={selectionData?.sessionType || "Lecture"}
-        batch={selectionData?.batch}
-        subject={selectionData?.subject}
-        lectureNumber={selectionData?.lectureNumber}
-        date={selectionData?.date}
-        branch={selectionData?.branch}
-        facultyId={selectionData?.facultyId}
-      />
-    </div>
+    <AttendanceTaker
+      students={students}
+      onSave={handleSaveAttendance}
+      onBack={handleBackToSelection}
+      classYear={selectionData?.classYear || ""}
+      division={selectionData?.division}
+      sessionType={selectionData?.sessionType || "Lecture"}
+      batch={selectionData?.batch}
+      subject={selectionData?.subject}
+      lectureNumber={selectionData?.lectureNumber}
+      date={selectionData?.date}
+      branch={selectionData?.branch}
+      facultyId={selectionData?.facultyId}
+    />
   );
 }

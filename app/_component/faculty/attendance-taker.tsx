@@ -149,7 +149,7 @@ export const AttendanceTaker = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50">
+    <div className="min-h-screen flex flex-col bg-slate-50">
       {/* Header section - Fixed at top */}
       <div className="sticky top-0 z-20 bg-white shadow-sm px-4 py-3 flex flex-col gap-3 border-b">
         {/* Header with back option */}
