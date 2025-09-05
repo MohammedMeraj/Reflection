@@ -5,10 +5,10 @@ import { Users, BookOpen, FlaskConical, Building2, User, ChevronDown } from "luc
 import { Button } from "@/components/ui/button";
 import { SmoothScrollContainer } from "@/components/ui/smooth-scroll-container";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
-import { DepartmentHeadHomeSkeleton } from "@/components/ui/skeleton";
 import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { DepartmentHeadDashboardSkeleton } from "./dashboard-skeleton";
 
 interface Faculty {
   id: string;
@@ -42,24 +42,25 @@ interface Lab {
 interface DepartmentHeadDashboardProps {
   facultyList: Faculty[];
   classList: Class[];
+  labsList?: any[];
+  currentDepartmentHead?: any;
   isLoading?: boolean;
 }
 
 export const DepartmentHeadDashboard = ({ 
   facultyList, 
   classList, 
+  labsList = [],
+  currentDepartmentHead,
   isLoading = false
 }: DepartmentHeadDashboardProps) => {
   const { user } = useKindeAuth();
-  const currentDepartmentHead = useQuery(api.superAdmin.getDepartmentHeadByEmail, {
-    email: user?.email || '',
-  });
 
   const [activeSection, setActiveSection] = useState<'overview' | 'faculty' | 'classes' | 'labs'>('overview');
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
-  // Get department name from the current department head data
+  // Get department name from the passed department head data
   const departmentName = currentDepartmentHead?.department?.name || 'Department';
 
   // Debug logging
@@ -80,18 +81,16 @@ export const DepartmentHeadDashboard = ({
     };
   }, []);
 
-  // Show skeleton loading
-  if (isLoading) {
-    return <DepartmentHeadHomeSkeleton />;
+  // Show skeleton loading if any data is still loading
+  if (isLoading || currentDepartmentHead === undefined) {
+    return <DepartmentHeadDashboardSkeleton />;
   }
 
-  // Calculate stats
+  // Calculate stats using real data
   const totalFaculty = facultyList.length;
   const totalClasses = classList.length;
-  const totalDivisions = classList.reduce((acc, cls) => acc + cls.divisions.length, 0);
-  const totalLabs = classList.reduce((acc, cls) => 
-    acc + cls.divisions.reduce((divAcc, div) => divAcc + div.labs.length, 0), 0
-  );
+  const totalDivisions = classList.reduce((acc, cls) => acc + (cls.divisions?.length || 0), 0);
+  const totalLabs = labsList.length;
 
   return (
     <div className="min-h-screen">

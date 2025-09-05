@@ -57,8 +57,44 @@ export const LabManagement = () => {
   const [labToDelete, setLabToDelete] = useState<{id: string, name: string} | null>(null);
 
   // Convex queries
-  const classList = useQuery(api.classes.getAllClasses) || [];
-  const allLabs = useQuery(api.labs.getAllLabs, {}) || [];
+  const classList = useQuery(api.classes.getAllClasses);
+  const allLabs = useQuery(api.labs.getAllLabs, {});
+
+  // Convex mutations
+  const createLabMutation = useMutation(api.labs.createLab);
+  const updateLabMutation = useMutation(api.labs.updateLab);
+  const deleteLabMutation = useMutation(api.labs.deleteLab);
+
+  // Auto-adjust start when class/division changes (conditional inside useEffect)
+  useEffect(() => {
+    if (classList && allLabs && selectedClassId) {
+      const selectedClass = classList.find(cls => cls._id === selectedClassId);
+      const availableDivisions = selectedClass?.divisions || [];
+      const hasDivisions = availableDivisions.length > 0;
+      
+      const getExistingLabs = () => {
+        return allLabs.filter(lab => {
+          if (hasDivisions && selectedDivisionId) {
+            return lab.divisionId === selectedDivisionId;
+          } else if (!hasDivisions && selectedClassId) {
+            return lab.classId === selectedClassId && !lab.divisionId;
+          }
+          return false;
+        });
+      };
+
+      const existingLabs = getExistingLabs();
+      const getNextAvailableStart = () => {
+        if (existingLabs.length === 0) return 1;
+        const maxEnd = Math.max(...existingLabs.map(lab => lab.rollNumberEnd));
+        return maxEnd + 1;
+      };
+
+      const nextStart = getNextAvailableStart();
+      setRollNumberStart(nextStart);
+      setRollNumberEnd(nextStart + 29); // Default range of 30
+    }
+  }, [classList, allLabs, selectedClassId, selectedDivisionId]);
 
   // Show skeleton loading
   const isLoading = classList === undefined || allLabs === undefined;
@@ -66,19 +102,14 @@ export const LabManagement = () => {
     return <LabManagementSkeleton />;
   }
 
-  // Convex mutations
-  const createLabMutation = useMutation(api.labs.createLab);
-  const updateLabMutation = useMutation(api.labs.updateLab);
-  const deleteLabMutation = useMutation(api.labs.deleteLab);
-
   // Get selected class details
-  const selectedClass = classList.find(cls => cls._id === selectedClassId);
+  const selectedClass = classList!.find(cls => cls._id === selectedClassId);
   const availableDivisions = selectedClass?.divisions || [];
   const hasDivisions = availableDivisions.length > 0;
 
   // Get existing labs for the selected class/division
   const getExistingLabs = () => {
-    return allLabs.filter(lab => {
+    return allLabs!.filter(lab => {
       if (hasDivisions && selectedDivisionId) {
         return lab.divisionId === selectedDivisionId;
       } else if (!hasDivisions && selectedClassId) {
@@ -90,6 +121,13 @@ export const LabManagement = () => {
 
   const existingLabs = getExistingLabs();
 
+  // Get next available start for roll numbers
+  const getNextAvailableStart = () => {
+    if (existingLabs.length === 0) return 1;
+    const maxEnd = Math.max(...existingLabs.map(lab => lab.rollNumberEnd));
+    return maxEnd + 1;
+  };
+
   // Check for overlapping ranges and suggest next start
   const checkRangeOverlap = (start: number, end: number) => {
     const overlapping = existingLabs.find(lab => 
@@ -99,22 +137,6 @@ export const LabManagement = () => {
     );
     return overlapping;
   };
-
-  const getNextAvailableStart = () => {
-    if (existingLabs.length === 0) return 1;
-    
-    const maxEnd = Math.max(...existingLabs.map(lab => lab.rollNumberEnd));
-    return maxEnd + 1;
-  };
-
-  // Auto-adjust start when class/division changes
-  useEffect(() => {
-    if (selectedClassId) {
-      const nextStart = getNextAvailableStart();
-      setRollNumberStart(nextStart);
-      setRollNumberEnd(nextStart + 29); // Default range of 30
-    }
-  }, [selectedClassId, selectedDivisionId, existingLabs.length]);
 
   // Generate unique lab ID
   const generateLabId = () => {
@@ -259,7 +281,7 @@ export const LabManagement = () => {
   };
 
   // Filter labs for search
-  const filteredLabs = allLabs.filter(lab =>
+  const filteredLabs = allLabs!.filter(lab =>
     lab.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     lab.className?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     lab.divisionName?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -329,7 +351,7 @@ export const LabManagement = () => {
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Choose a class</option>
-                  {classList.map((cls: Class) => (
+                  {classList!.map((cls: Class) => (
                     <option key={cls._id} value={cls._id}>
                       {cls.name} ({cls.year})
                     </option>

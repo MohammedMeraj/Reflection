@@ -41,16 +41,10 @@ export const SubjectManagement = () => {
   const [subjectToDelete, setSubjectToDelete] = useState<{id: string, name: string} | null>(null);
 
   // Convex queries and mutations
-  const subjects = useQuery(api.subjects.getAllSubjects, {}) || [];
+  const subjects = useQuery(api.subjects.getAllSubjects, {});
   const createSubjectMutation = useMutation(api.subjects.createSubject);
   const updateSubjectMutation = useMutation(api.subjects.updateSubject);
   const deleteSubjectMutation = useMutation(api.subjects.deleteSubject);
-
-  // Show skeleton loading
-  const isLoading = subjects === undefined;
-  if (isLoading) {
-    return <SubjectManagementSkeleton />;
-  }
 
   // Generate subject ID for preview
   const generateSubjectId = (name: string, code: string) => {
@@ -65,6 +59,12 @@ export const SubjectManagement = () => {
     const id = generateSubjectId(newSubject.name, newSubject.code);
     setPreviewSubjectId(id);
   }, [newSubject.name, newSubject.code]);
+
+  // Show skeleton loading
+  const isLoading = subjects === undefined;
+  if (isLoading) {
+    return <SubjectManagementSkeleton />;
+  }
 
   const handleAddSubject = async () => {
     if (newSubject.name && newSubject.code) {
@@ -137,7 +137,7 @@ export const SubjectManagement = () => {
     setEditSubject({ name: "", code: "", credits: 1 });
   };
 
-  const filteredSubjects = subjects.filter(subject =>
+  const filteredSubjects = subjects!.filter(subject =>
     subject.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     subject.code?.toLowerCase().includes(searchTerm.toLowerCase())
   );

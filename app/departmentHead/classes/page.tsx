@@ -99,13 +99,47 @@ export default function ClassesPage() {
     }
   };
 
-  // Show loading state while data is being fetched
+  // Show skeleton loading until classes data is loaded
   if (classListData === undefined) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading classes data...</p>
+      <div className="min-h-screen bg-gray-50">
+        {/* Fixed Header Skeleton */}
+        <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between p-4 max-w-md mx-auto">
+            <div className="h-6 w-32 bg-gray-200 rounded animate-pulse"></div>
+            <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* Main Content Skeleton */}
+        <div className="pt-20 pb-20 p-4 max-w-md mx-auto space-y-6">
+          {/* Stats Cards Skeleton */}
+          <div className="grid grid-cols-2 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="h-4 w-16 bg-gray-200 rounded animate-pulse mb-2"></div>
+                <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+
+          {/* Classes List Skeleton */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="p-4 border-b">
+              <div className="h-5 w-24 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+            <div className="p-4 space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <div className="h-4 w-20 bg-gray-200 rounded animate-pulse mb-1"></div>
+                    <div className="h-3 w-16 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                  <div className="w-6 h-6 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );

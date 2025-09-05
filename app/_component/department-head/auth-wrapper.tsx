@@ -18,32 +18,8 @@ export const DepartmentHeadAuthWrapper = ({ children }: DepartmentHeadAuthWrappe
     user?.email ? { email: user.email } : "skip"
   );
 
-  // Show loading while authentication is loading
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Authenticating...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show loading while fetching department head data
-  if (user?.email && currentDepartmentHead === undefined) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading department information...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error if user is not logged in
-  if (!user?.email) {
+  // Show error if user is not logged in (no loading screen)
+  if (!authLoading && !user?.email) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center p-8 bg-yellow-50 rounded-lg border border-yellow-200 max-w-md mx-auto">
@@ -63,7 +39,7 @@ export const DepartmentHeadAuthWrapper = ({ children }: DepartmentHeadAuthWrappe
   }
 
   // Show error if user is logged in but not found as department head
-  if (user.email && currentDepartmentHead === null) {
+  if (!authLoading && user?.email && currentDepartmentHead === null) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center p-8 bg-red-50 rounded-lg border border-red-200 max-w-md mx-auto">
@@ -82,6 +58,16 @@ export const DepartmentHeadAuthWrapper = ({ children }: DepartmentHeadAuthWrappe
     );
   }
 
-  // If all checks pass, render the children
-  return <>{children}</>;
+  // If user is authenticated (regardless of department head data loading), render children
+  // The children components will handle their own loading states with skeletons
+  if (user?.email) {
+    return <>{children}</>;
+  }
+
+  // Only show loading for auth loading (should be very brief)
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    </div>
+  );
 };

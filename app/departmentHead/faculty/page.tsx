@@ -18,8 +18,8 @@ export default function FacultyPage() {
   );
 
   // Convex queries
-  const facultyList = useQuery(api.faculty.getAllFaculty, {}) || [];
-  const classList = useQuery(api.classes.getAllClasses) || [];
+  const facultyList = useQuery(api.faculty.getAllFaculty, {});
+  const classList = useQuery(api.classes.getAllClasses);
 
   // Convex mutations
   const addFacultyMutation = useMutation(api.faculty.createFaculty);
@@ -27,6 +27,58 @@ export default function FacultyPage() {
   const deleteFacultyMutation = useMutation(api.faculty.deleteFaculty);
   const assignCoordinatorMutation = useMutation(api.faculty.assignClassCoordinator);
   const removeCoordinatorMutation = useMutation(api.faculty.removeClassCoordinator);
+
+  // Show skeleton loading until all data is loaded
+  if (facultyList === undefined || classList === undefined || currentDepartmentHead === undefined) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Fixed Header Skeleton */}
+        <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between p-4 max-w-md mx-auto">
+            <div className="h-6 w-32 bg-gray-200 rounded animate-pulse"></div>
+            <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* Main Content Skeleton */}
+        <div className="pt-20 pb-20 p-4 max-w-md mx-auto space-y-6">
+          {/* Stats Cards Skeleton */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-lg p-4 shadow-sm">
+              <div className="h-4 w-16 bg-gray-200 rounded animate-pulse mb-2"></div>
+              <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+            <div className="bg-white rounded-lg p-4 shadow-sm">
+              <div className="h-4 w-20 bg-gray-200 rounded animate-pulse mb-2"></div>
+              <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Faculty List Skeleton */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="p-4 border-b">
+              <div className="h-5 w-24 bg-gray-200 rounded animate-pulse mb-3"></div>
+              <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+            <div className="p-4 space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+                    <div>
+                      <div className="h-4 w-24 bg-gray-200 rounded animate-pulse mb-1"></div>
+                      <div className="h-3 w-32 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                  <div className="w-6 h-6 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleAddFaculty = async (faculty: {
     name: string;
@@ -40,7 +92,7 @@ export default function FacultyPage() {
       // Convert string IDs to Convex IDs
       const assignedClassIds = faculty.assignedClasses
         .map(classId => {
-          const classItem = classList.find(cls => cls.classId === classId);
+          const classItem = (classList || []).find(cls => cls.classId === classId);
           return classItem ? classItem._id : null;
         })
         .filter(Boolean) as Id<"classes">[];
@@ -86,7 +138,7 @@ export default function FacultyPage() {
       setIsLoading(true);
       
       // Find the faculty by facultyId
-      const faculty = facultyList.find((f: any) => f.facultyId === id);
+      const faculty = facultyList!.find((f: any) => f.facultyId === id);
       if (!faculty) {
         throw new Error("Faculty not found");
       }
@@ -96,7 +148,7 @@ export default function FacultyPage() {
       if (updates.assignedClasses) {
         updateData.assignedClasses = updates.assignedClasses
           .map(classId => {
-            const classItem = classList.find(cls => cls.classId === classId);
+            const classItem = classList!.find(cls => cls.classId === classId);
             return classItem ? classItem._id : null;
           })
           .filter(Boolean) as Id<"classes">[];
@@ -121,7 +173,7 @@ export default function FacultyPage() {
       setIsLoading(true);
       
       // Find the faculty by facultyId
-      const faculty = facultyList.find((f: any) => f.facultyId === id);
+      const faculty = facultyList!.find((f: any) => f.facultyId === id);
       if (!faculty) {
         throw new Error("Faculty not found");
       }
@@ -147,7 +199,7 @@ export default function FacultyPage() {
       console.log("🔄 Assigning coordinator:", { facultyId, target });
       
       // Find the faculty by facultyId
-      const faculty = facultyList.find((f: any) => f.facultyId === facultyId);
+      const faculty = facultyList!.find((f: any) => f.facultyId === facultyId);
       if (!faculty) {
         throw new Error("Faculty not found");
       }
@@ -156,7 +208,7 @@ export default function FacultyPage() {
 
       let coordinatorTarget;
       if (target.type === "class" && target.classId) {
-        const classItem = classList.find(cls => cls.classId === target.classId);
+        const classItem = classList!.find(cls => cls.classId === target.classId);
         if (!classItem) throw new Error("Class not found");
         coordinatorTarget = {
           type: "class" as const,
@@ -204,7 +256,7 @@ export default function FacultyPage() {
       setIsLoading(true);
       
       // Find the faculty by facultyId
-      const faculty = facultyList.find((f: any) => f.facultyId === facultyId);
+      const faculty = facultyList!.find((f: any) => f.facultyId === facultyId);
       if (!faculty) {
         throw new Error("Faculty not found");
       }
@@ -219,8 +271,8 @@ export default function FacultyPage() {
     }
   };
 
-  // Transform data for component compatibility
-  const transformedFacultyList = facultyList.map((faculty: any) => ({
+  // Transform data for component compatibility (data is guaranteed to be loaded here)
+  const transformedFacultyList = (facultyList || []).map((faculty: any) => ({
     id: faculty.facultyId,
     name: faculty.name,
     email: faculty.email,
@@ -230,7 +282,7 @@ export default function FacultyPage() {
     isClassCoordinator: faculty.isClassCoordinator,
   }));
 
-  const transformedClassList = classList.map(cls => ({
+  const transformedClassList = (classList || []).map(cls => ({
     id: cls.classId,
     name: cls.name,
     year: cls.year,
