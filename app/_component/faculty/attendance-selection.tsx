@@ -133,105 +133,40 @@ export const AttendanceSelection = ({
   
   // Get divisions for selected class
   const selectedClass = finalAvailableClasses.find(cls => cls.name === classYear);
-  // Only show divisions if they actually exist in the backend data
-  const divisions = selectedClass?.divisions && selectedClass.divisions.length > 0 
-    ? selectedClass.divisions.map((div: any) => div.name) 
-    : [];
+  const divisions = selectedClass?.divisions.map((div: any) => div.name) || [];
   
   console.log('Selected class:', selectedClass);
-  console.log('Divisions from backend:', selectedClass?.divisions);
-  console.log('Final divisions to show:', divisions);
+  console.log('Divisions:', divisions);
   
   // Get available labs for selected class/division
   const getAvailableBatches = () => {
     if (!selectedClass) return [];
     
-    console.log('=== LAB FILTERING DEBUG ===');
     console.log('Selected class for labs:', selectedClass);
-    console.log('Available labs from API:', labsList);
-    console.log('Current division:', division);
-    
-    if (!labsList || labsList.length === 0) {
-      console.log('No labs available from API');
-      return [];
-    }
-    
-    // Log each lab's structure
-    labsList.forEach((lab: any, index: number) => {
-      console.log(`Lab ${index}:`, {
-        name: lab.name,
-        classId: lab.classId,
-        divisionId: lab.divisionId,
-        className: lab.className,
-        divisionName: lab.divisionName,
-        _id: lab._id
-      });
-    });
-    
-    let filteredLabs: any[] = [];
+    console.log('Available labs:', labsList);
     
     if (division) {
       // Filter labs by division
       const divisionData = selectedClass.divisions.find((div: any) => div.name === division);
       console.log('Division data:', divisionData);
       
-      if (divisionData) {
-        filteredLabs = labsList?.filter((lab: any) => {
-          // Primary matching strategy: match by division name
-          const divisionNameMatch = lab.divisionName === division;
-          
-          // Secondary matching strategy: match by division ID if available
-          const divisionId = divisionData?.id;
-          const idMatch = divisionId && lab.divisionId === divisionId;
-          
-          console.log('Checking lab for division:', {
-            labName: lab.name,
-            labDivisionName: lab.divisionName,
-            expectedDivisionName: division,
-            labDivisionId: lab.divisionId,
-            expectedDivisionId: divisionId,
-            divisionNameMatch,
-            idMatch,
-            finalMatch: divisionNameMatch || idMatch
-          });
-          
-          return divisionNameMatch || idMatch;
-        }) || [];
-      }
-    } else {
-      // Filter labs by class (no division) - only labs that belong to class and have NO division
-      filteredLabs = labsList?.filter((lab: any) => {
-        // Primary matching strategy: match by class name and ensure no division
-        const classNameMatch = lab.className === classYear;
-        const hasNoDivision = !lab.divisionId && !lab.divisionName;
-        
-        // Secondary matching strategy: match by class ID if available  
-        const classId = selectedClass.id;
-        const idMatch = classId && lab.classId === classId && hasNoDivision;
-        
-        console.log('Checking lab for class:', {
-          labName: lab.name,
-          labClassName: lab.className,
-          expectedClassName: classYear,
-          labClassId: lab.classId,
-          expectedClassId: classId,
-          hasNoDivision,
-          classNameMatch,
-          idMatch,
-          finalMatch: (classNameMatch && hasNoDivision) || idMatch
-        });
-        
-        return (classNameMatch && hasNoDivision) || idMatch;
+      const divisionLabs = labsList?.filter((lab: any) => {
+        console.log('Checking lab:', lab, 'against divisionId:', divisionData?._id);
+        return lab.divisionId === divisionData?._id;
       }) || [];
+      
+      console.log('Division labs found:', divisionLabs);
+      return divisionLabs.map((lab: any) => lab.name);
+    } else {
+      // Filter labs by class (no division)
+      const classLabs = labsList?.filter((lab: any) => {
+        console.log('Checking lab:', lab, 'against classId:', selectedClass._id);
+        return lab.classId === selectedClass._id && !lab.divisionId;
+      }) || [];
+      
+      console.log('Class labs found:', classLabs);
+      return classLabs.map((lab: any) => lab.name);
     }
-    
-    console.log('Filtered labs:', filteredLabs);
-    
-    // Don't show fallback - only show labs that actually match the class/division
-    const labNames = filteredLabs.map((lab: any) => lab.name);
-    console.log('Final lab names:', labNames);
-    
-    return labNames;
   };
   
   const batches = getAvailableBatches();
@@ -399,25 +334,31 @@ export const AttendanceSelection = ({
           )}
         </div>
         
-        {/* Division selection (only show if class has divisions) */}
-        {classYear && divisions.length > 0 && (
+        {/* Division selection (if applicable) */}
+        {classYear && (
           <div className="mb-6">
             <h3 className="font-medium mb-3">Division*</h3>
-            <div className="grid grid-cols-4 gap-3">
-              {divisions.map((div: string) => (
-                <button
-                  key={div}
-                  className={`p-3 rounded-xl text-center ${
-                    division === div
-                      ? "bg-blue-100 border-2 border-blue-500 text-blue-700"
-                      : "bg-white border border-gray-200"
-                  }`}
-                  onClick={() => setDivision(div)}
-                >
-                  {div}
-                </button>
-              ))}
-            </div>
+            {divisions.length === 0 ? (
+              <div className="p-4 text-center text-gray-500 bg-gray-100 rounded-xl">
+                No divisions found for this class
+              </div>
+            ) : (
+              <div className="grid grid-cols-4 gap-3">
+                {divisions.map((div: string) => (
+                  <button
+                    key={div}
+                    className={`p-3 rounded-xl text-center ${
+                      division === div
+                        ? "bg-blue-100 border-2 border-blue-500 text-blue-700"
+                        : "bg-white border border-gray-200"
+                    }`}
+                    onClick={() => setDivision(div)}
+                  >
+                    {div}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
         

@@ -86,6 +86,11 @@ export default function HomePage() {
                   Launch for Department Head
                 </Button>
               </Link>
+              <Link href="/developer" className="block">
+                <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-2 px-4 rounded-md transition-all shadow-lg">
+                  🔧 Developer Portal
+                </Button>
+              </Link>
             </div>
           </>
         ) : (
@@ -115,6 +120,11 @@ export default function HomePage() {
               <Link href="/departmentHead" className="block">
                 <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors">
                   Launch for Department Head
+                </Button>
+              </Link>
+              <Link href="/developer" className="block">
+                <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-2 px-4 rounded-md transition-all shadow-lg">
+                  🔧 Developer Portal
                 </Button>
               </Link>
             </div>

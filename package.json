@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup-developer": "node scripts/setup-developer.js"
   },
   "dependencies": {
     "@kinde-oss/kinde-auth-nextjs": "^2.6.2",
