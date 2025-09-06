@@ -160,8 +160,8 @@ export const AttendanceSelection = ({
     } else {
       // Filter labs by class (no division)
       const classLabs = labsList?.filter((lab: any) => {
-        console.log('Checking lab:', lab, 'against classId:', selectedClass._id);
-        return lab.classId === selectedClass._id && !lab.divisionId;
+        console.log('Checking lab:', lab, 'against classId:', selectedClass.id);
+        return lab.classId === selectedClass.id && !lab.divisionId;
       }) || [];
       
       console.log('Class labs found:', classLabs);
