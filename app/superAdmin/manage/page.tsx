@@ -22,6 +22,7 @@ import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
 
 interface Department {
   _id: Id<"departments">;
@@ -49,6 +50,7 @@ interface DepartmentHead {
 }
 
 export default function ManagePage() {
+  const { user } = useKindeAuth();
   const [activeTab, setActiveTab] = useState<"departments" | "heads">("heads");
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddDepartment, setShowAddDepartment] = useState(false);
@@ -58,11 +60,27 @@ export default function ManagePage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleteDepartmentConfirm, setDeleteDepartmentConfirm] = useState<string | null>(null);
 
-  // Convex queries
-  const departmentHeads = useQuery(api.superAdmin.getAllDepartmentHeads);
-  const departments = useQuery(api.superAdmin.getAllDepartments);
-  const searchResults = useQuery(api.superAdmin.searchDepartmentHeads, 
-    searchTerm.length > 0 ? { searchTerm } : "skip"
+  // Get current super admin info
+  const currentSuperAdmin = useQuery(
+    api.superAdmin.getSuperAdminByEmail,
+    user?.email ? { email: user.email } : "skip"
+  );
+
+  // Convex queries - filtered by super admin ID
+  const departmentHeads = useQuery(
+    api.superAdmin.getDepartmentHeadsBySuperAdmin,
+    currentSuperAdmin?._id ? { superAdminId: currentSuperAdmin._id } : "skip"
+  );
+  const departments = useQuery(
+    api.superAdmin.getDepartmentsBySuperAdmin,
+    currentSuperAdmin?._id ? { superAdminId: currentSuperAdmin._id } : "skip"
+  );
+  const searchResults = useQuery(
+    api.superAdmin.searchDepartmentHeadsBySuperAdmin, 
+    searchTerm.length > 0 && currentSuperAdmin?._id ? { 
+      searchTerm, 
+      superAdminId: currentSuperAdmin._id 
+    } : "skip"
   );
 
   // Convex mutations
@@ -125,6 +143,7 @@ export default function ManagePage() {
       await addDepartment({
         ...data,
         code: uniqueCode, // Use generated code
+        superAdminEmail: user?.email || "", // Add super admin email
       });
     } catch (error) {
       console.error("Failed to add department:", error);
@@ -139,6 +158,7 @@ export default function ManagePage() {
       await addDepartmentHead({
         ...data,
         employeeId: uniqueEmployeeId, // Use generated employee ID
+        superAdminEmail: user?.email || "", // Add super admin email
       });
     } catch (error) {
       console.error("Failed to add department head:", error);

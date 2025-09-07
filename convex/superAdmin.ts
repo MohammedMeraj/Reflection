@@ -9,6 +9,7 @@ export const addDepartment = mutation({
     code: v.string(),
     establishedYear: v.optional(v.number()),
     headOfDepartment: v.optional(v.string()),
+    superAdminEmail: v.string(),
   },
   handler: async (ctx, args) => {
     // Check if department code already exists
@@ -21,8 +22,21 @@ export const addDepartment = mutation({
       throw new Error("Department code already exists");
     }
 
+    // Find super admin by email
+    const superAdmin = await ctx.db
+      .query("superAdmins")
+      .filter((q) => q.eq(q.field("email"), args.superAdminEmail))
+      .first();
+
+    if (!superAdmin) {
+      throw new Error("Super admin not found");
+    }
+
+    const { superAdminEmail, ...departmentData } = args;
+
     return await ctx.db.insert("departments", {
-      ...args,
+      ...departmentData,
+      superAdminId: superAdmin._id,
       createdAt: Date.now(),
       isActive: true,
     });
@@ -95,6 +109,7 @@ export const addDepartmentHead = mutation({
     managementEnabled: v.boolean(),
     qualification: v.optional(v.string()),
     experience: v.optional(v.number()),
+    superAdminEmail: v.string(),
   },
   handler: async (ctx, args) => {
     // Check if email already exists
@@ -115,6 +130,16 @@ export const addDepartmentHead = mutation({
     
     if (existingEmpId) {
       throw new Error("Employee ID already exists");
+    }
+
+    // Find super admin by email
+    const superAdmin = await ctx.db
+      .query("superAdmins")
+      .filter((q) => q.eq(q.field("email"), args.superAdminEmail))
+      .first();
+
+    if (!superAdmin) {
+      throw new Error("Super admin not found");
     }
 
     // Generate unique department head ID
@@ -139,10 +164,12 @@ export const addDepartmentHead = mutation({
     };
 
     const uniqueId = await generateUniqueId(args.name);
+    const { superAdminEmail, ...departmentHeadData } = args;
 
     return await ctx.db.insert("departmentHeads", {
-      ...args,
+      ...departmentHeadData,
       uniqueId,
+      superAdminId: superAdmin._id,
       isActive: true,
       createdAt: Date.now(),
       lastActiveAt: Date.now(),
@@ -522,5 +549,89 @@ export const getSystemMetrics = query({
       systemHealth,
       lastUpdated: Date.now(),
     };
+  },
+});
+
+// Get super admin by email
+export const getSuperAdminByEmail = query({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("superAdmins")
+      .filter((q) => q.eq(q.field("email"), args.email))
+      .first();
+  },
+});
+
+// Get departments by super admin ID
+export const getDepartmentsBySuperAdmin = query({
+  args: { superAdminId: v.id("superAdmins") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("departments")
+      .filter((q) => q.eq(q.field("superAdminId"), args.superAdminId))
+      .order("desc")
+      .collect();
+  },
+});
+
+// Get department heads by super admin ID
+export const getDepartmentHeadsBySuperAdmin = query({
+  args: { superAdminId: v.id("superAdmins") },
+  handler: async (ctx, args) => {
+    const departmentHeads = await ctx.db
+      .query("departmentHeads")
+      .filter((q) => q.eq(q.field("superAdminId"), args.superAdminId))
+      .order("desc")
+      .collect();
+
+    // Get department details for each department head
+    const departmentHeadsWithDept = await Promise.all(
+      departmentHeads.map(async (head) => {
+        const department = await ctx.db.get(head.departmentId);
+        return {
+          ...head,
+          department: department || null,
+        };
+      })
+    );
+
+    return departmentHeadsWithDept;
+  },
+});
+
+// Search department heads by super admin ID
+export const searchDepartmentHeadsBySuperAdmin = query({
+  args: { 
+    searchTerm: v.string(),
+    superAdminId: v.id("superAdmins")
+  },
+  handler: async (ctx, args) => {
+    const allDeptHeads = await ctx.db
+      .query("departmentHeads")
+      .filter((q) => q.eq(q.field("superAdminId"), args.superAdminId))
+      .order("desc")
+      .collect();
+
+    const searchTerm = args.searchTerm.toLowerCase();
+    const filtered = allDeptHeads.filter(head => 
+      head.name.toLowerCase().includes(searchTerm) ||
+      head.email.toLowerCase().includes(searchTerm) ||
+      head.employeeId.toLowerCase().includes(searchTerm) ||
+      head.uniqueId.toLowerCase().includes(searchTerm)
+    );
+
+    // Get department details for filtered results
+    const departmentHeadsWithDept = await Promise.all(
+      filtered.map(async (head) => {
+        const department = await ctx.db.get(head.departmentId);
+        return {
+          ...head,
+          department: department || null,
+        };
+      })
+    );
+
+    return departmentHeadsWithDept;
   },
 });
